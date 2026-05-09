@@ -7,7 +7,7 @@ namespace Core.Models
 {
     public class Product
     {
-        public int Id { get; set; }
+        public int ProductId { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -21,12 +21,11 @@ namespace Core.Models
 
         public DateTime CreatedAt { get; set; }
 
-        
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
 
         // Seller
-        public string SellerId { get; set; }
+        public int SellerId { get; set; }
         public ApplicationUser? Seller { get; set; }
 
         // Navigation
