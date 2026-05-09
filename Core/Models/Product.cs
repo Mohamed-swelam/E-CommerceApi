@@ -33,6 +33,5 @@ namespace Core.Models
 
         public ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
 
-        public ICollection<OrderItem> OrderItems { get; set; } = new HashSet<OrderItem>();
     }
 }
