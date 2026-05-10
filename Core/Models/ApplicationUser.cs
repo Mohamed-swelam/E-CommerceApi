@@ -1,25 +1,32 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.Enums;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        [MaxLength(30)]
-        public required string FirstName { get; set; }
-        [MaxLength(30)]
-        public required string LastName { get; set; }
-        [MaxLength(100)]
+
+        [Required(ErrorMessage = "Name is Required")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 50 characters")]
+        public string FullName { get; set; }
+
+        public byte[]? Image { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        [StringLength(100, ErrorMessage = "Address must be at most 100 characters")]
         public string? Address { get; set; }
-        public int Age { get; set; }
 
-        // Navigation
-        public ICollection<Product> Products { get; set; } = new HashSet<Product>();
+        public List<RefreshToken> RefreshTokens { get; set; } = new();
 
-        public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
-
-        public ICollection<WishlistItem> WishlistItems { get; set; } = new HashSet<WishlistItem>();
-        public ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
-
+        public ICollection<Order> Orders { get; set; }
+        public ICollection<Review> Reviews { get; set; }
+        public ICollection<WishlistItem> Wishlists { get; set; }
+        public Cart Cart { get; set; }
     }
 }
