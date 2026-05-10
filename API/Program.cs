@@ -1,5 +1,5 @@
-using Core.Interfaces;
 using Core.Interfaces.IRepositories;
+using Core.Interfaces.Services;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -65,7 +65,18 @@ builder.Services.AddAuthorization();
 // ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<JwtHelper>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
+
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+
+
+
+
 
 // ===== Controllers =====
 builder.Services.AddControllers()
@@ -90,11 +101,6 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
-
-
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 
 

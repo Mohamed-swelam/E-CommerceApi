@@ -1,6 +1,6 @@
 ﻿using Core.DTOs.Account;
 using Core.DTOs.Auth;
-using Core.Interfaces;
+using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
