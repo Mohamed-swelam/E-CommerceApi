@@ -1,17 +1,26 @@
-﻿namespace Core.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Core.Models
 {
     public class Shipping
     {
         public int Id { get; set; }
 
-        public string TrackingNumber { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public required string TrackingNumber { get; set; }
 
-        public string Carrier { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public required string Carrier { get; set; }
 
         public DateTime? ShippedDate { get; set; }
 
         public DateTime? DeliveredDate { get; set; }
 
+        [Required]
+        [ForeignKey(nameof(Order))]
         public int OrderId { get; set; }
 
         public Order? Order { get; set; }

@@ -63,6 +63,11 @@ namespace Infrastructure.Repositories
             return await dbSet.FindAsync(id);
         }
 
+        public async Task SaveChangesAsync()
+        {
+            await context.SaveChangesAsync();
+        }
+
         public void Update(T entity)
         {
             dbSet.Update(entity);
