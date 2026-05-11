@@ -11,23 +11,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===== Database =====
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ===== Identity =====
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Password
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
 
-    // Email
     options.User.RequireUniqueEmail = true;
 
-    // Lockout
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.AllowedForNewUsers = true;
@@ -35,7 +30,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ===== JWT =====
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!);
 
@@ -60,12 +54,11 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISellerService, SellerService>();
 builder.Services.AddScoped<JwtHelper>();
 
-// ===== Controllers =====
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {

@@ -42,9 +42,6 @@ namespace Services
             _config = config;
         }
 
-        // ===========================
-        // REGISTER
-        // ===========================
         public async Task<GeneralResponse> RegisterAsync(RegisterDto dto)
         {
             var existingUser = await _userManager.FindByEmailAsync(dto.Email);
@@ -72,9 +69,7 @@ namespace Services
             return Ok("Registration successful. Check your email for the verification code.");
         }
 
-        // ===========================
-        // LOGIN
-        // ===========================
+        
         public async Task<GeneralResponse> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -122,9 +117,7 @@ namespace Services
             });
         }
 
-        // ===========================
-        // LOGOUT
-        // ===========================
+        
         public async Task<GeneralResponse> LogoutAsync(string userId)
         {
             var user = await _userManager.Users
@@ -143,9 +136,7 @@ namespace Services
             return Ok("Signed out successfully.");
         }
 
-        // ===========================
-        // CONFIRM EMAIL
-        // ===========================
+        
         public async Task<GeneralResponse> ConfirmEmailAsync(ConfirmEmailDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -168,9 +159,7 @@ namespace Services
             return Ok("Email successfully confirmed.");
         }
 
-        // ===========================
-        // RESEND CONFIRMATION CODE
-        // ===========================
+        
         public async Task<GeneralResponse> ResendConfirmationCodeAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -185,9 +174,7 @@ namespace Services
             return Ok("Verification code sent.");
         }
 
-        // ===========================
-        // FORGET PASSWORD
-        // ===========================
+       
         public async Task<GeneralResponse> ForgetPasswordAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -213,9 +200,7 @@ namespace Services
             }
         }
 
-        // ===========================
-        // VERIFY RESET CODE
-        // ===========================
+        
         public async Task<GeneralResponse> VerifyResetCodeAsync(VerifyCodeDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -230,15 +215,12 @@ namespace Services
 
             await _userManager.RemoveAuthenticationTokenAsync(user, "ResetPassword", "ResetPasswordCode");
 
-            // token مؤقت لعملية reset password فقط
             var token = await GenerateJwtToken(user, isResetPassword: true);
 
             return Ok(token);
         }
 
-        // ===========================
-        // RESET PASSWORD
-        // ===========================
+       
         public async Task<GeneralResponse> ResetPasswordAsync(ResetPasswordDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -259,9 +241,7 @@ namespace Services
             return Ok("Password has been changed successfully.");
         }
 
-        // ===========================
-        // CHANGE PASSWORD
-        // ===========================
+        
         public async Task<GeneralResponse> ChangePasswordAsync(ChangePasswordDto dto, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -282,9 +262,7 @@ namespace Services
             return Ok("Password changed successfully.");
         }
 
-        // ===========================
-        // REFRESH TOKEN
-        // ===========================
+        
         public async Task<GeneralResponse> RefreshTokenAsync(TokenRequestDto dto)
         {
             var user = await _userManager.Users
@@ -299,10 +277,8 @@ namespace Services
             if (!refreshToken.IsActive)
                 return Fail("Refresh token has expired.");
 
-            // Revoke القديم
             refreshToken.Revoked = DateTime.UtcNow;
 
-            // اعمل جديد
             var newJwt = await GenerateJwtToken(user);
             var newRefreshToken = GenerateRefreshToken();
 
@@ -322,9 +298,7 @@ namespace Services
             });
         }
 
-        // ===========================
-        // REVOKE ALL TOKENS
-        // ===========================
+        
         public async Task<GeneralResponse> RevokeAllTokensAsync(string userId)
         {
             var user = await _userManager.Users
@@ -342,9 +316,7 @@ namespace Services
             return Ok("All tokens have been revoked.");
         }
 
-        // ===========================
-        // PRIVATE HELPERS
-        // ===========================
+        
         private async Task SendConfirmationEmailAsync(ApplicationUser user)
         {
             var code = _emailService.GenerateVerificationCode();

@@ -23,7 +23,6 @@ public class JwtHelper
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // جيب الـ Roles من Identity
         var roles = await _userManager.GetRolesAsync(user);
 
         var claims = new List<Claim>
@@ -34,7 +33,6 @@ public class JwtHelper
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // ضيف كل Role كـ Claim
         foreach (var role in roles)
             claims.Add(new Claim(ClaimTypes.Role, role));
 
