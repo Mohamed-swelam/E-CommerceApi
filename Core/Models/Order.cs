@@ -16,7 +16,6 @@ namespace Core.Models
 
         public OrderStatus Status { get; set; }
 
-
         [Required]
         [MaxLength(250)]
         public required string ShippingAddress { get; set; }
@@ -27,8 +26,8 @@ namespace Core.Models
 
         public ApplicationUser? User { get; set; }
 
-
-        public ICollection<OrderItem> OrderItems { get; set; } = new HashSet<OrderItem>();
+        public ICollection<OrderItem> OrderItems { get; set; }
+            = new HashSet<OrderItem>();
 
         public Payment? Payment { get; set; }
 
