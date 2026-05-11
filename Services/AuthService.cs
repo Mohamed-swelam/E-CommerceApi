@@ -1,7 +1,7 @@
 ﻿using Core.DTOs.Account;
 using Core.DTOs.Auth;
 using Core.DTOs.GeneralDto;
-using Core.Interfaces;
+using Core.Interfaces.Services;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;

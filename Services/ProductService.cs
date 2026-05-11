@@ -1,0 +1,155 @@
+﻿using AutoMapper;
+using Core.DTOs.GeneralDto;
+using Core.DTOs.Product;
+using Core.Helpers;
+using Core.Interfaces.IRepositories;
+using Core.Interfaces.Services;
+using Core.Models;
+using Microsoft.AspNetCore.Http;
+namespace Services
+{
+    public class ProductService : IProductService
+    {
+        private readonly IProductRepository _repository;
+        private readonly ImageHelper _imageHelper;
+        private readonly IMapper _mapper;
+        public ProductService(IProductRepository repository, ImageHelper imageHelper, IMapper mapper)
+        {
+            _repository = repository;
+            _imageHelper = imageHelper;
+            _mapper = mapper;
+        }
+
+        public async Task<GeneralResponse> AddProductAsync(AddProductDto dto, string userId)
+        {
+            var product = _mapper.Map<Product>(dto);
+            product.CreatedAt = DateTime.UtcNow;
+            await _repository.AddAsync(product);
+            await _repository.SaveChangesAsync();
+            return new GeneralResponse
+            {
+                IsSuccess = true,
+                Data = _mapper.Map<Product>(product)
+            };
+        }
+
+        public async Task<GeneralResponse> UpdateProductAsync(UpdateProductDto dto, string userId)
+        {
+            // Check if the product exists and belongs to the seller
+            var product = await _repository.GetAsync(p => p.ProductId == dto.ProductId, "SellerProfile");
+            if (product == null)
+                return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
+            // Check if the seller is authorized to update the product
+            if (product.SellerProfile?.UserId != userId)
+                return new GeneralResponse { IsSuccess = false, Data = "This seller is unauthorized to update this product" };
+            // Map the updated fields from the DTO to the existing product entity
+            _mapper.Map(dto, product);
+            // Update the product in the repository and save changes
+            _repository.Update(product);
+            await _repository.SaveChangesAsync();
+            return new GeneralResponse
+            {
+                IsSuccess = true,
+                Data = _mapper.Map<Product>(product)
+            };
+        }
+        public async Task<GeneralResponse> RemoveProductAsync(int productId, string userId)
+        {
+            // Check if the product exists and belongs to the seller
+            var product = await _repository.GetAsync(p => p.ProductId == productId, "SellerProfile");
+            if (product == null)
+                return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
+            // Check if the seller is authorized to delete the product
+            if (product.SellerProfile?.UserId != userId)
+                return new GeneralResponse { IsSuccess = false, Data = "This seller is unauthorized to delete this product" };
+            // Delete the product from the repository and save changes
+            _repository.Delete(product);
+            await _repository.SaveChangesAsync();
+            return new GeneralResponse { IsSuccess = true, Data = "Product removed successfully" };
+        }
+        public async Task<GeneralResponse> GetProductByIdAsync(int productId)
+        {
+            // Check if the product exists
+            var product = await _repository.GetAsync(p => p.ProductId == productId, "Category,Images,Reviews,SellerProfile");
+            if (product == null)
+                return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
+            return new GeneralResponse
+            {
+                IsSuccess = true,
+                Data = _mapper.Map<Product>(product)
+            };
+        }
+        public async Task<GeneralResponse> GetAllProductsAsync(ProductFilterDto filter)
+        {
+            var query = _repository.GetAll(includeProperties: "Category,Images,SellerProfile");
+            // Search
+            if (!string.IsNullOrEmpty(filter.Search))
+                query = query.Where(p => p.Name.Contains(filter.Search));
+            // Filter by Category
+            if (filter.CategoryId.HasValue)
+                query = query.Where(p => p.CategoryId == filter.CategoryId);
+            // Filter by Price
+            if (filter.MinPrice.HasValue)
+                query = query.Where(p => p.Price >= filter.MinPrice);
+            if (filter.MaxPrice.HasValue)
+                query = query.Where(p => p.Price <= filter.MaxPrice);
+            // Sorting
+            query = filter.SortBy switch
+            {
+                "price" => filter.Order == "asc"
+                    ? query.OrderBy(p => p.Price)
+                    : query.OrderByDescending(p => p.Price),
+                "name" => filter.Order == "asc"
+                    ? query.OrderBy(p => p.Name)
+                    : query.OrderByDescending(p => p.Name),
+                _ => query.OrderByDescending(p => p.CreatedAt)
+            };
+            // Pagination
+            var totalCount = query.Count();
+            var products = query
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToList();
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return new GeneralResponse
+            {
+                IsSuccess = true,
+                Data = new
+                {
+                    TotalCount = totalCount,
+                    Page = filter.Page,
+                    PageSize = filter.PageSize,
+                    Products = productDtos
+                }
+            };
+        }
+        public async Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image)
+        {
+            // Check if the product exists
+            var product = await _repository.GetAsync(p => p.ProductId == productId, includeProperties: "Images");
+            if (product == null)
+                return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
+            string imageName = await _imageHelper.SaveImageAsync(image, MediaSettings.ProductImagesPath);
+            var productImage = new ProductImage
+            {
+                ImageName = imageName,
+                ProductId = productId,
+                IsMain = !product.ImagesNames.Any() // Set as main image if it's the first one
+            };
+            product.ImagesNames.Add(productImage);
+            await _repository.SaveChangesAsync();
+            return new GeneralResponse { IsSuccess = true, Data = "Image added successfully" };
+        }
+        public async Task<GeneralResponse> GetProductsBySellerAsync(string sellerProfileId)
+        {
+            var products = _repository.GetAll(p => p.SellerProfile.UserId == sellerProfileId,
+                includeProperties: "Category,Images,SellerProfile");
+            var ProductsDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return new GeneralResponse
+            {
+                IsSuccess = true,
+                Data = ProductsDtos
+            };
+        }
+    }
+}

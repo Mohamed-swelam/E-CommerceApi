@@ -1,6 +1,11 @@
-using Core.Interfaces;
+using Core.Helpers;
+using Core.Interfaces.IRepositories;
+using Core.Interfaces.Services;
+using Core.Mappers;
 using Core.Models;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
+using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +64,28 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISellerService, SellerService>();
 builder.Services.AddScoped<JwtHelper>();
 
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<JwtHelper>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
+
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddAutoMapper(c =>
+{
+    c.AddProfile<ProductMappingProfile>();
+    c.AddProfile<CategoryMappingProfile>();
+}, typeof(ProductMappingProfile).Assembly);
+
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
+builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<ImageHelper>();
+
+// ===== Controllers =====
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -83,6 +110,8 @@ builder.Services.AddSwaggerGen();
 
 
 
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -91,9 +120,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var userManager =
+        services.GetRequiredService<UserManager<ApplicationUser>>();
+
+    var roleManager =
+        services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await DbInitializer.SeedAdminAsync(userManager, roleManager);
+}
+
+
 app.UseHttpsRedirection();
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();

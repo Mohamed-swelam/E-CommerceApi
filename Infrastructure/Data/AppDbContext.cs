@@ -14,72 +14,50 @@ namespace Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<IdentityRole>().HasData(
-            new IdentityRole { Id = "1", Name = "Admin", NormalizedName = "ADMIN" },
-            new IdentityRole { Id = "2", Name = "Seller", NormalizedName = "SELLER" },
-            new IdentityRole { Id = "3", Name = "Customer", NormalizedName = "CUSTOMER" }
-            );
-
-            // ===== Seed Admin User =====
-            var hasher = new PasswordHasher<ApplicationUser>();
-            var adminUser = new ApplicationUser
-            {
-                Id = "seed-admin-001",
-                FullName = "Super Admin",
-                UserName = "admin@store.com",
-                NormalizedUserName = "ADMIN@STORE.COM",
-                Email = "admin@store.com",
-                NormalizedEmail = "ADMIN@STORE.COM",
-                EmailConfirmed = true,
-                IsDeleted = false,
-                CreatedAt = new DateTime(2025, 1, 1),
-                UpdatedAt = new DateTime(2025, 1, 1),
-                SecurityStamp = "STATIC-SECURITY-STAMP-001"
-            };
-            adminUser.PasswordHash = hasher.HashPassword(adminUser, "Admin@123");
-
-            modelBuilder.Entity<ApplicationUser>().HasData(adminUser);
-
-            modelBuilder.Entity<IdentityUserRole<string>>().HasData(
-                new IdentityUserRole<string> { UserId = "seed-admin-001", RoleId = "1" }
-            );
-
-            modelBuilder.Entity<ApplicationUser>()
-                .HasQueryFilter(u => !u.IsDeleted);
+            // ApplicationUser
 
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
-                entity.Property(u => u.FullName).IsRequired().HasMaxLength(50);
-                entity.Property(u => u.Address).HasMaxLength(100);
+                entity.HasQueryFilter(u => !u.IsDeleted);
 
+                entity.Property(u => u.FullName)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(u => u.Address)
+                      .HasMaxLength(100);
+
+                // User -> Cart
                 entity.HasOne(u => u.Cart)
                       .WithOne(c => c.User)
                       .HasForeignKey<Cart>(c => c.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
-               
-                   entity.HasMany(u => u.RefreshTokens)
-                   .WithOne()
-                   .OnDelete(DeleteBehavior.Cascade);
 
-            });
-            modelBuilder.Entity<RefreshToken>(entity =>
-            {
-                entity.HasKey(r => r.Id);
+                // User -> RefreshTokens
+                entity.HasMany(u => u.RefreshTokens)
+                      .WithOne(r => r.User)
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(r => r.User)
-                      .WithMany(u => u.RefreshTokens)
+                // User -> SellerProfile
+                entity.HasOne(u => u.Seller)
+                      .WithOne(s => s.User)
+                      .HasForeignKey<Sellerprofile>(s => s.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // User -> Reviews
+                entity.HasMany(u => u.Reviews)
+                      .WithOne(r => r.User)
                       .HasForeignKey(r => r.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // SellerProfile
 
             modelBuilder.Entity<Sellerprofile>(entity =>
             {
-                entity.HasKey(s => s.Id);
-
                 entity.Property(s => s.StoreName)
                       .IsRequired()
                       .HasMaxLength(100);
@@ -88,51 +66,140 @@ namespace Infrastructure.Data
                       .IsUnique();
 
                 entity.Property(s => s.TotalEarnings)
-                      .HasColumnType("decimal(18,2)")
+                      .HasPrecision(18, 2)
                       .HasDefaultValue(0);
 
                 entity.Property(s => s.IsApproved)
                       .HasDefaultValue(false);
 
-                entity.HasOne(s => s.User)
-                      .WithOne(u => u.Seller)
-                      .HasForeignKey<Sellerprofile>(s => s.UserId) 
-                      .OnDelete(DeleteBehavior.Cascade);
-
+                // Seller -> Products
                 entity.HasMany(s => s.Products)
-                      .WithOne(p => p.Seller)
-                      .HasForeignKey(p => p.SellerId)
+                      .WithOne(p => p.SellerProfile)
+                      .HasForeignKey(p => p.SellerProfileId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // Category
 
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.Property(c => c.Name)
+                      .IsRequired()
+                      .HasMaxLength(100);
 
+                entity.HasMany(c => c.Products)
+                      .WithOne(p => p.Category)
+                      .HasForeignKey(p => p.CategoryId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Product
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.Name)
+                      .IsRequired()
+                      .HasMaxLength(100);
+
+                entity.Property(p => p.Description)
+                      .HasMaxLength(1000);
+
+                entity.Property(p => p.Price)
+                      .HasPrecision(18, 2);
+
+                entity.HasMany(p => p.ImagesNames)
+                      .WithOne(pi => pi.Product)
+                      .HasForeignKey(pi => pi.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(p => p.Reviews)
+                      .WithOne(r => r.Product)
+                      .HasForeignKey(r => r.ProductId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // ProductImage
+
+            modelBuilder.Entity<ProductImage>(entity =>
+            {
+                entity.Property(pi => pi.ImageName)
+                      .IsRequired()
+                      .HasMaxLength(255);
+            });
+
+            // Review
+
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.Property(r => r.Comment)
+                      .HasMaxLength(1000);
+            });
+
+            // CartItem
 
             modelBuilder.Entity<CartItem>()
                 .HasOne(ci => ci.Product)
-                .WithMany()
+                .WithMany(p => p.CartItems)
                 .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // OrderItem
+
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Product)
-                .WithMany()
+                .WithMany(p => p.OrderItems)
                 .HasForeignKey(oi => oi.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Review>()
-              .HasOne(r => r.Product)
-              .WithMany()
-              .HasForeignKey(r => r.ProductId)
-              .OnDelete(DeleteBehavior.NoAction);
+            // WishlistItem
 
             modelBuilder.Entity<WishlistItem>()
                 .HasOne(wi => wi.Product)
-                .WithMany()
+                .WithMany(p => p.WishlistItems)
                 .HasForeignKey(wi => wi.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Order
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalAmount)
+                .HasPrecision(18, 2);
+
+            // OrderItem
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(oi => oi.Price)
+                .HasPrecision(18, 2);
+
+            // Payment
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
+
+            // Product
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.Price)
+                      .HasColumnType("decimal(18,2)");
+
+                entity.HasOne(p => p.Category)
+                      .WithMany(c => c.Products)
+                      .HasForeignKey(p => p.CategoryId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ProductImage
+            modelBuilder.Entity<ProductImage>(entity =>
+            {
+                entity.HasOne(pi => pi.Product)
+                      .WithMany(p => p.ImagesNames)
+                      .HasForeignKey(pi => pi.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
-        public List<RefreshToken> RefreshTokens { get; set; } = new();
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public DbSet<Sellerprofile> Sellers { get; set; }
         public DbSet<Product> Products { get; set; }

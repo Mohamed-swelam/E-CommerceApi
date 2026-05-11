@@ -1,6 +1,6 @@
 ﻿using Core.DTOs.GeneralDto;
 using Core.DTOs.Seller;
-using Core.Interfaces;
+using Core.Interfaces.Services;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
