@@ -5,20 +5,18 @@ using Core.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
 using Core.Models;
-using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 namespace Services
 {
     public class ProductService : IProductService
     {
         private readonly IProductRepository _repository;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ImageHelper _imageHelper;
         private readonly IMapper _mapper;
-        public ProductService(IProductRepository repository, IWebHostEnvironment webHostEnvironment, IMapper mapper)
+        public ProductService(IProductRepository repository, ImageHelper imageHelper, IMapper mapper)
         {
             _repository = repository;
-            _webHostEnvironment = webHostEnvironment;
+            _imageHelper = imageHelper;
             _mapper = mapper;
         }
 
@@ -131,21 +129,7 @@ namespace Services
             var product = await _repository.GetAsync(p => p.ProductId == productId, includeProperties: "Images");
             if (product == null)
                 return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
-            // Generate a unique filename for the image
-            string imageName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-            // Determine the folder path to save the image
-            string folderPath = Path.Combine(_webHostEnvironment.WebRootPath, MediaSettings.ProductImagesPath);
-            // Ensure the folder exists, if not create it
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
-            // Combine the folder path and image name to get the full path
-            string fullPath = Path.Combine(folderPath, imageName);
-            // Save the image to the specified path
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await image.CopyToAsync(stream);
-            }
-            // Add the image to the product's image collection
+            string imageName = await _imageHelper.SaveImageAsync(image, MediaSettings.ProductImagesPath);
             var productImage = new ProductImage
             {
                 ImageName = imageName,

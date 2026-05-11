@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 namespace Core.DTOs.Category
 {
     public class AddCategoryDto
@@ -7,6 +7,6 @@ namespace Core.DTOs.Category
         [Required, MaxLength(100)]
         public string Name { get; set; }
         [Required]
-        public string Icon { get; set; }
+        public IFormFile Icon { get; set; }
     }
 }
