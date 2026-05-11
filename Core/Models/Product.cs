@@ -17,7 +17,7 @@ namespace Core.Models
         // Seller
         [ForeignKey(nameof(Sellerprofile))]
         public int SellerProfileId { get; set; }
-        public Sellerprofile? Seller { get; set; }
+        public Sellerprofile? SellerProfile { get; set; }
         // Navigation
         public ICollection<ProductImage> ImagesNames { get; set; } = new HashSet<ProductImage>();
         public ICollection<Review> Reviews { get; set; } = new HashSet<Review>();

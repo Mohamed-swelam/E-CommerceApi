@@ -1,5 +1,6 @@
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
+using Core.Mappers;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -72,8 +73,11 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
-
+builder.Services.AddAutoMapper(
+    c => c.AddProfile<ProductMappingProfile>(),
+    typeof(ProductMappingProfile).Assembly            
+);
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 

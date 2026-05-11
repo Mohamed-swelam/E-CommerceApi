@@ -3,6 +3,7 @@ namespace Core.DTOs.Product
 {
     public class UpdateProductDto
     {
+        public int ProductId { get; set; }
         [MaxLength(100)]
         public string? Name { get; set; }
         public string? Description { get; set; }
