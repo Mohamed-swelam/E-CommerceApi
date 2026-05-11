@@ -1,3 +1,4 @@
+using Core.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
 using Core.Mappers;
@@ -82,7 +83,7 @@ builder.Services.AddAutoMapper(c =>
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddScoped<IStripeService, StripeService>();
-
+builder.Services.AddScoped<ImageHelper>();
 
 // ===== Controllers =====
 builder.Services.AddControllers()

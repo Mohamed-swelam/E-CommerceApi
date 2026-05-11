@@ -7,7 +7,7 @@ namespace Core.Interfaces.Services
         Task<GeneralResponse> GetAllCategoriesAsync();
         Task<GeneralResponse> GetCategoryByIdAsync(int categoryId);
         Task<GeneralResponse> AddCategoryAsync(AddCategoryDto dto);
-        Task<GeneralResponse> UpdateCategoryAsync(UpdateCategory dto);
+        Task<GeneralResponse> UpdateCategoryAsync(UpdateCategoryDto dto);
         Task<GeneralResponse> RemoveCategoryAsync(int categoryId);
     }
 }

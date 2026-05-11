@@ -46,7 +46,7 @@ namespace API.Controllers
         // Put: api/Category
         [HttpPut]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategory dto)
+        public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryDto dto)
         {
             var response = await _service.UpdateCategoryAsync(dto);
             if (!response.IsSuccess)

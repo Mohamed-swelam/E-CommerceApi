@@ -7,12 +7,14 @@ namespace Core.Mappers
     {
         public CategoryMappingProfile()
         {
-            // Mapping from Category to CategoryDto
+            // Category → CategoryDto
             CreateMap<Category, CategoryDto>();
-            // Mapping from AddCategoryDto to Category
-            CreateMap<AddCategoryDto, Category>();
-            // Mapping from UpdateCategory to Category
-            CreateMap<UpdateCategory, Category>()
+            // AddCategoryDto → Category
+            CreateMap<AddCategoryDto, Category>()
+                .ForMember(dest => dest.Icon, opt => opt.Ignore());
+            // UpdateCategoryDto → Category
+            CreateMap<UpdateCategoryDto, Category>()
+                .ForMember(dest => dest.Icon, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition(
                     (src, dest, srcMember) => srcMember != null));
         }

@@ -64,7 +64,7 @@ namespace Services
             return new GeneralResponse { IsSuccess = true, Data = $"Category {category.Name} removed successfully" };
         }
 
-        public async Task<GeneralResponse> UpdateCategoryAsync(UpdateCategory dto)
+        public async Task<GeneralResponse> UpdateCategoryAsync(UpdateCategoryDto dto)
         {
             var category = await _repository.GetByIdAsync(dto.CategoryId);
             if (category == null)

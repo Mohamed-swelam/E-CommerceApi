@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 namespace Core.DTOs.Category
 {
-    public class UpdateCategory
+    public class UpdateCategoryDto
     {
         public int CategoryId { get; set; }
         public string? Name { get; set; }
