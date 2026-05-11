@@ -7,7 +7,7 @@ namespace Core.Models
     public class Payment
     {
         [Key]
-        public int Id { get; set; }
+        public int PaymentId { get; set; }
 
         [Range(0.01, double.MaxValue)]
         public decimal Amount { get; set; }

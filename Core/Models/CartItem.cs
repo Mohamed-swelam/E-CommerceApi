@@ -6,7 +6,7 @@ namespace Core.Models
     public class CartItem
     {
         [Key]
-        public int Id { get; set; }
+        public int CartItemId { get; set; }
 
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; }

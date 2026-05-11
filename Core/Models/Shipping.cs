@@ -5,7 +5,8 @@ namespace Core.Models
 {
     public class Shipping
     {
-        public int Id { get; set; }
+        [Key]
+        public int ShippingId { get; set; }
 
         [Required]
         [MaxLength(100)]

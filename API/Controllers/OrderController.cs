@@ -60,7 +60,7 @@ namespace API.Controllers
 
                 var orderResponseDtos = orders.Select(o => new OrderResponseDto
                 {
-                    OrderId = o.Id,
+                    OrderId = o.OrderId,
                     OrderDate = o.OrderDate,
                     TotalAmount = o.TotalAmount,
                     Status = o.Status,
@@ -110,7 +110,7 @@ namespace API.Controllers
                 }
 
                 var order = await orderRepository.GetAsync(
-                    o => o.Id == id && o.UserId == userId,
+                    o => o.OrderId == id && o.UserId == userId,
                     includeProperties: "OrderItems,OrderItems.Product");
 
                 if (order == null)
@@ -123,7 +123,7 @@ namespace API.Controllers
 
                 var orderDto = new OrderResponseDto
                 {
-                    OrderId = order.Id,
+                    OrderId = order.OrderId,
                     OrderDate = order.OrderDate,
                     TotalAmount = order.TotalAmount,
                     Status = order.Status,
@@ -280,7 +280,7 @@ namespace API.Controllers
 
                 response.Data = new
                 {
-                    OrderId = order.Id,
+                    OrderId = order.OrderId,
                     ClientSecret = paymentIntent.ClientSecret,
                     TotalAmount = order.TotalAmount
                 };
@@ -315,7 +315,7 @@ namespace API.Controllers
                 }
 
                 var order = await orderRepository.GetAsync(
-                    o => o.Id == id && o.UserId == userId,
+                    o => o.OrderId == id && o.UserId == userId,
                     includeProperties: "Payment");
 
                 if (order == null)

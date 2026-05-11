@@ -1,10 +1,10 @@
-using Core.Interfaces;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
 using Core.Mappers;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -117,6 +117,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var userManager =
+        services.GetRequiredService<UserManager<ApplicationUser>>();
+
+    var roleManager =
+        services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await DbInitializer.SeedAdminAsync(userManager, roleManager);
+}
+
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

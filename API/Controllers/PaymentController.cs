@@ -88,7 +88,7 @@ namespace API.Controllers
                         {
                             var product =
                                 await productRepository.GetAsync(
-                                    p => p.Id == item.ProductId);
+                                    p => p.ProductId == item.ProductId);
 
                             if (product != null)
                             {
