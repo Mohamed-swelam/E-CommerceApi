@@ -1,3 +1,4 @@
+using API.middelwares;
 using Core.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
@@ -134,7 +135,8 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.SeedAdminAsync(userManager, roleManager);
 }
 
-
+app.UseMiddleware<ExceptionMiddleware>();     
+app.UseMiddleware<RequestLoggingMiddleware>(); 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
