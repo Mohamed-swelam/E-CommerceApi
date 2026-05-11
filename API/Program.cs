@@ -70,12 +70,14 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddAutoMapper(
-    c => c.AddProfile<ProductMappingProfile>(),
-    typeof(ProductMappingProfile).Assembly            
-);
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddAutoMapper(c =>
+{
+    c.AddProfile<ProductMappingProfile>();
+    c.AddProfile<CategoryMappingProfile>();
+}, typeof(ProductMappingProfile).Assembly);
 
 
 
