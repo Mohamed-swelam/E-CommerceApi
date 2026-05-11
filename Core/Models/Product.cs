@@ -26,8 +26,8 @@ namespace Core.Models
         public Category? Category { get; set; }
 
         // Seller
-        public string SellerId { get; set; }
-        public ApplicationUser? Seller { get; set; }
+        public int SellerId { get; set; }
+        public Sellerprofile? Seller { get; set; }
 
         // Navigation
         public ICollection<ProductImage> Images { get; set; } = new HashSet<ProductImage>();

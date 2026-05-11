@@ -30,5 +30,8 @@ namespace Core.Models
         [Column(TypeName = "decimal(18,2)")]
         [Range(0, double.MaxValue, ErrorMessage = "Earnings must be Positive")]
         public decimal TotalEarnings { get; set; } = 0;
+
+        public ICollection<Product> Products { get; set; }
+
     }
 }

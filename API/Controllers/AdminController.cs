@@ -2,6 +2,7 @@
 using Core.Enums;
 using Core.Models;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,8 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")] 
+
     public class AdminController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
