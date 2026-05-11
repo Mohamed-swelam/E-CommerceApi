@@ -23,6 +23,7 @@ namespace Core.Models
         public string? Address { get; set; }
 
         public List<RefreshToken> RefreshTokens { get; set; } = new();
+        public Sellerprofile? Seller { get; set; }
 
         public ICollection<Order> Orders { get; set; }
         public ICollection<Review> Reviews { get; set; }

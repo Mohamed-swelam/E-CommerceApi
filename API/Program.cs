@@ -1,5 +1,7 @@
+using Core.Interfaces;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
+using Core.Mappers;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -13,23 +15,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===== Database =====
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ===== Identity =====
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Password
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
 
-    // Email
     options.User.RequireUniqueEmail = true;
 
-    // Lockout
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.AllowedForNewUsers = true;
@@ -37,7 +34,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ===== JWT =====
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!);
 
@@ -62,9 +58,11 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISellerService, SellerService>();
+builder.Services.AddScoped<JwtHelper>();
+
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<JwtHelper>();
 
@@ -72,6 +70,12 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddAutoMapper(
+    c => c.AddProfile<ProductMappingProfile>(),
+    typeof(ProductMappingProfile).Assembly            
+);
+builder.Services.AddScoped<IProductService, ProductService>();
+
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddScoped<IStripeService, StripeService>();
@@ -118,5 +122,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();

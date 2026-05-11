@@ -85,7 +85,7 @@ namespace Infrastructure.Data
                       .HasMaxLength(100);
 
                 entity.HasIndex(s => s.StoreName)
-                      .IsUnique(); 
+                      .IsUnique();
 
                 entity.Property(s => s.TotalEarnings)
                       .HasColumnType("decimal(18,2)")
@@ -93,6 +93,16 @@ namespace Infrastructure.Data
 
                 entity.Property(s => s.IsApproved)
                       .HasDefaultValue(false);
+
+                entity.HasOne(s => s.User)
+                      .WithOne(u => u.Seller)
+                      .HasForeignKey<Sellerprofile>(s => s.UserId) 
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(s => s.Products)
+                      .WithOne(p => p.Seller)
+                      .HasForeignKey(p => p.SellerId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
 
