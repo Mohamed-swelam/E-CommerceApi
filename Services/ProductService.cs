@@ -5,6 +5,7 @@ using Core.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
 using Core.Models;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 namespace Services
@@ -80,16 +81,48 @@ namespace Services
                 Data = _mapper.Map<Product>(product)
             };
         }
-        public async Task<GeneralResponse> GetAllProductsAsync()
+        public async Task<GeneralResponse> GetAllProductsAsync(ProductFilterDto filter)
         {
-            // Retrieve all products with related entities
-            var products = _repository.GetAll(includeProperties: "Category,Images,SellerProfile");
-            // Map the products to DTOs and return the response
-            var productDTos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            var query = _repository.GetAll(includeProperties: "Category,Images,SellerProfile");
+            // Search
+            if (!string.IsNullOrEmpty(filter.Search))
+                query = query.Where(p => p.Name.Contains(filter.Search));
+            // Filter by Category
+            if (filter.CategoryId.HasValue)
+                query = query.Where(p => p.CategoryId == filter.CategoryId);
+            // Filter by Price
+            if (filter.MinPrice.HasValue)
+                query = query.Where(p => p.Price >= filter.MinPrice);
+            if (filter.MaxPrice.HasValue)
+                query = query.Where(p => p.Price <= filter.MaxPrice);
+            // Sorting
+            query = filter.SortBy switch
+            {
+                "price" => filter.Order == "asc"
+                    ? query.OrderBy(p => p.Price)
+                    : query.OrderByDescending(p => p.Price),
+                "name" => filter.Order == "asc"
+                    ? query.OrderBy(p => p.Name)
+                    : query.OrderByDescending(p => p.Name),
+                _ => query.OrderByDescending(p => p.CreatedAt)
+            };
+            // Pagination
+            var totalCount = query.Count();
+            var products = query
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToList();
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
             return new GeneralResponse
             {
                 IsSuccess = true,
-                Data = _mapper.Map<List<Product>>(products)
+                Data = new
+                {
+                    TotalCount = totalCount,
+                    Page = filter.Page,
+                    PageSize = filter.PageSize,
+                    Products = productDtos
+                }
             };
         }
         public async Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image)
@@ -122,6 +155,17 @@ namespace Services
             product.ImagesNames.Add(productImage);
             await _repository.SaveChangesAsync();
             return new GeneralResponse { IsSuccess = true, Data = "Image added successfully" };
+        }
+        public async Task<GeneralResponse> GetProductsBySellerAsync(string sellerProfileId)
+        {
+            var products = _repository.GetAll(p => p.SellerProfile.UserId == sellerProfileId,
+                includeProperties: "Category,Images,SellerProfile");
+            var ProductsDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return new GeneralResponse
+            {
+                IsSuccess = true,
+                Data = ProductsDtos
+            };
         }
     }
 }

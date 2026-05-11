@@ -15,12 +15,11 @@ namespace API.Controllers
         }
         //Get Api/product
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        [HttpGet]
+        public async Task<IActionResult> GetAllProducts([FromQuery] ProductFilterDto filter)
         {
-            var response = await _service.GetAllProductsAsync();
-            if (!response.IsSuccess)
-                return BadRequest(response);
-            return Ok(response);
+            var result = await _service.GetAllProductsAsync(filter);
+            return Ok(result);
         }
         //Get Api/product/{id}
         [HttpGet("{id}")]
@@ -79,6 +78,19 @@ namespace API.Controllers
             if (userId == null)
                 return Unauthorized(new { Message = "User not authorized" });
             var response = await _service.AddProductImageAsync(id, image);
+            if (!response.IsSuccess)
+                return BadRequest(response);
+            return Ok(response);
+        }
+        //Get api/product/seller/{sellerProfileId}
+        [HttpGet("seller/{sellerProfileId}")]
+        [Authorize(Roles = "Seller,Admin")]
+        public async Task<IActionResult> GetProductsBySeller()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized(new { Message = "User not authorized" });
+            var response = await _service.GetProductsBySellerAsync(userId);
             if (!response.IsSuccess)
                 return BadRequest(response);
             return Ok(response);
