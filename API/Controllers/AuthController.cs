@@ -89,5 +89,13 @@ namespace API.Controllers
             var result = await _authService.LogoutAsync(userId);
             return Ok(result);
         }
+        [Authorize]
+        [HttpPost("revoke-all-tokens")]
+        public async Task<IActionResult> RevokeAllTokens()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await _authService.RevokeAllTokensAsync(userId);
+            return Ok(result);
+        }
     }
 }
