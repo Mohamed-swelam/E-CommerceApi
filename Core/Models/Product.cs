@@ -25,7 +25,7 @@ namespace Core.Models
         public Category? Category { get; set; }
 
         // Seller
-        public int SellerId { get; set; }
+        public string SellerId { get; set; }
         public ApplicationUser? Seller { get; set; }
 
         // Navigation
