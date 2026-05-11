@@ -29,7 +29,7 @@ namespace Services
 
             return new CartResponseDto
             {
-                CartId = cart.Id,
+                CartId = cart.CartId,
                 Items = cart.Items.Select(i => new CartItemResponseDto
                 {
                     ProductId = i.ProductId,
@@ -52,7 +52,7 @@ namespace Services
                 };
             }
 
-            var product = await _productRepository.GetAsync(p => p.Id == dto.ProductId);
+            var product = await _productRepository.GetAsync(p => p.ProductId == dto.ProductId);
             if (product == null)
             {
                 return new GeneralResponse
@@ -146,7 +146,7 @@ namespace Services
                 };
             }
 
-            var product = await _productRepository.GetAsync(p => p.Id == dto.ProductId);
+            var product = await _productRepository.GetAsync(p => p.ProductId == dto.ProductId);
             if (product == null)
             {
                 return new GeneralResponse

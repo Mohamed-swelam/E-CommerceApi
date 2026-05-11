@@ -7,7 +7,7 @@ namespace Core.Models
     public class Order
     {
         [Key]
-        public int Id { get; set; }
+        public int OrderId { get; set; }
 
         public DateTime OrderDate { get; set; }
 
@@ -15,7 +15,6 @@ namespace Core.Models
         public decimal TotalAmount { get; set; }
 
         public OrderStatus Status { get; set; }
-
 
         [Required]
         [MaxLength(250)]
@@ -27,8 +26,8 @@ namespace Core.Models
 
         public ApplicationUser? User { get; set; }
 
-
-        public ICollection<OrderItem> OrderItems { get; set; } = new HashSet<OrderItem>();
+        public ICollection<OrderItem> OrderItems { get; set; }
+            = new HashSet<OrderItem>();
 
         public Payment? Payment { get; set; }
 

@@ -1,20 +1,33 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Core.Models
 {
     public class Payment
     {
-        public int Id { get; set; }
+        [Key]
+        public int PaymentId { get; set; }
 
         [Range(0.01, double.MaxValue)]
         public decimal Amount { get; set; }
 
+        // Stripe Payment Intent Id
         [Required]
-        [MaxLength(100)]
+        [MaxLength(200)]
         public required string TransactionId { get; set; }
 
-        public DateTime PaidAt { get; set; }
+        // Stripe Session / Intent Secret
+        [MaxLength(500)]
+        public string? ClientSecret { get; set; }
+
+        public PaymentStatus Status { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public required string PaymentMethod { get; set; }
+
+        public DateTime? PaidAt { get; set; }
 
         [Required]
         [ForeignKey(nameof(Order))]
