@@ -131,6 +131,21 @@ namespace Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(wi => wi.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.Price)
+                .HasColumnType("decimal(18,2)");
+
+                entity.HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<ProductImage>()
+                .HasOne(pi => pi.Product)
+                .WithMany(p => p.ImagesNames)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
         public List<RefreshToken> RefreshTokens { get; set; } = new();
 
