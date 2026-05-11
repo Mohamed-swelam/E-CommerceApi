@@ -1,4 +1,6 @@
-﻿namespace Core.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Core.Models
 {
     public class Category
     {
