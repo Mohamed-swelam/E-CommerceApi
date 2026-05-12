@@ -112,10 +112,8 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
-
-
-
 
 
 var app = builder.Build();
@@ -131,13 +129,25 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
+    var context =
+        services.GetRequiredService<AppDbContext>();
+
     var userManager =
-        services.GetRequiredService<UserManager<ApplicationUser>>();
+        services.GetRequiredService
+        <UserManager<ApplicationUser>>();
 
     var roleManager =
-        services.GetRequiredService<RoleManager<IdentityRole>>();
+        services.GetRequiredService
+        <RoleManager<IdentityRole>>();
 
-    await DbInitializer.SeedAdminAsync(userManager, roleManager);
+    await DbInitializer.SeedAdminAsync(
+        userManager,
+        roleManager);
+
+    await AppDbInitializer.SeedAsync(
+        context,
+        userManager,
+        roleManager);
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
