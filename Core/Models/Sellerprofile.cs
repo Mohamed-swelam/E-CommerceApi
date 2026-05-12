@@ -31,7 +31,7 @@ namespace Core.Models
         [Range(0, double.MaxValue, ErrorMessage = "Earnings must be Positive")]
         public decimal TotalEarnings { get; set; } = 0;
 
-        public ICollection<Product> Products { get; set; }
+        public ICollection<Product> Products { get; set; } = new HashSet<Product>();
 
     }
 }

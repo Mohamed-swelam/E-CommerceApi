@@ -144,10 +144,10 @@ using (var scope = app.Services.CreateScope())
         userManager,
         roleManager);
 
-    await AppDbInitializer.SeedAsync(
-        context,
-        userManager,
-        roleManager);
+    //await AppDbInitializer.SeedAsync(
+    //    context,
+    //    userManager,
+    //    roleManager);
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
