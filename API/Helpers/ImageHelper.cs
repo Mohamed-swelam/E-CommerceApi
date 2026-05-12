@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-namespace Core.Helpers
+using Core.Interfaces.Helpers;
+
+namespace API.Helpers
 {
-    public class ImageHelper
+    public class ImageHelper : IImageHelper
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
         public ImageHelper(IWebHostEnvironment webHostEnvironment)

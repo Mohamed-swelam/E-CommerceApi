@@ -2,11 +2,13 @@ using API.middelwares;
 using Core.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
+using Core.Interfaces.Helpers;
 using Core.Mappers;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Seeders;
+using API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -66,6 +68,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -84,7 +87,7 @@ builder.Services.AddScoped<IReviewService, Services.ReviewService>();
 
 //helpers
 builder.Services.AddScoped<JwtHelper>();
-builder.Services.AddScoped<ImageHelper>();
+builder.Services.AddScoped<IImageHelper, ImageHelper>();
 
 //mappers
 builder.Services.AddAutoMapper(c =>

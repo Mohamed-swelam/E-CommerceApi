@@ -2,6 +2,7 @@
 using Core.DTOs.GeneralDto;
 using Core.DTOs.Product;
 using Core.Helpers;
+using Core.Interfaces.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
 using Core.Models;
@@ -11,9 +12,9 @@ namespace Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _repository;
-        private readonly ImageHelper _imageHelper;
+        private readonly IImageHelper _imageHelper;
         private readonly IMapper _mapper;
-        public ProductService(IProductRepository repository, ImageHelper imageHelper, IMapper mapper)
+        public ProductService(IProductRepository repository, IImageHelper imageHelper, IMapper mapper)
         {
             _repository = repository;
             _imageHelper = imageHelper;
