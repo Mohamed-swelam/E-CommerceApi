@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Services;
+using Stripe;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,17 +72,19 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductService, Services.ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddAutoMapper(c =>
 {
     c.AddProfile<ProductMappingProfile>();
     c.AddProfile<CategoryMappingProfile>();
+    c.AddProfile<ReviewMappingProfile>();
 }, typeof(ProductMappingProfile).Assembly);
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
+builder.Services.AddScoped<IReviewService, Services.ReviewService>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<ImageHelper>();
 
