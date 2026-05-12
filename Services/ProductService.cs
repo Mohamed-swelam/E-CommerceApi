@@ -14,16 +14,27 @@ namespace Services
         private readonly IProductRepository _repository;
         private readonly IImageHelper _imageHelper;
         private readonly IMapper _mapper;
-        public ProductService(IProductRepository repository, IImageHelper imageHelper, IMapper mapper)
+        private readonly Infrastructure.Data.AppDbContext _context;
+        public ProductService(IProductRepository repository, IImageHelper imageHelper, IMapper mapper, Infrastructure.Data.AppDbContext context)
         {
             _repository = repository;
             _imageHelper = imageHelper;
             _mapper = mapper;
+            _context = context;
         }
 
         public async Task<GeneralResponse> AddProductAsync(AddProductDto dto, string userId)
         {
+            // Verify seller exists and belongs to authenticated user
+            var seller = await _context.Sellers.FindAsync(dto.SellerId);
+            if (seller == null)
+                return new GeneralResponse { IsSuccess = false, Data = "Seller not found" };
+            if (seller.UserId != userId)
+                return new GeneralResponse { IsSuccess = false, Data = "This seller is unauthorized to add products for this store" };
+
             var product = _mapper.Map<Product>(dto);
+            // Ensure correct seller profile id is set
+            product.SellerProfileId = dto.SellerId;
             product.CreatedAt = DateTime.UtcNow;
             await _repository.AddAsync(product);
             await _repository.SaveChangesAsync();
@@ -124,12 +135,15 @@ namespace Services
                 }
             };
         }
-        public async Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image)
+        public async Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image, string userId)
         {
             // Check if the product exists
-            var product = await _repository.GetAsync(p => p.ProductId == productId, includeProperties: "Images");
+            var product = await _repository.GetAsync(p => p.ProductId == productId, includeProperties: "Images,SellerProfile");
             if (product == null)
                 return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
+            // Verify ownership
+            if (product.SellerProfile == null || product.SellerProfile.UserId != userId)
+                return new GeneralResponse { IsSuccess = false, Data = "This seller is unauthorized to add images for this product" };
             string imageName = await _imageHelper.SaveImageAsync(image, MediaSettings.ProductImagesPath);
             var productImage = new ProductImage
             {

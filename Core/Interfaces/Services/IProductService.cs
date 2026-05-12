@@ -7,7 +7,7 @@ namespace Core.Interfaces.Services
     {
         Task<GeneralResponse> GetProductByIdAsync(int productId);
         Task<GeneralResponse> GetAllProductsAsync(ProductFilterDto filter);
-        Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image);
+        Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image, string userId);
         Task<GeneralResponse> AddProductAsync(AddProductDto dto, string userId);
         Task<GeneralResponse> UpdateProductAsync(UpdateProductDto dto, string userId);
         Task<GeneralResponse> RemoveProductAsync(int productId, string userId);

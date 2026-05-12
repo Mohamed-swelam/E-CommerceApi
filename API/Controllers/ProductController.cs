@@ -77,7 +77,7 @@ namespace API.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
                 return Unauthorized(new { Message = "User not authorized" });
-            var response = await _service.AddProductImageAsync(id, image);
+            var response = await _service.AddProductImageAsync(id, image, userId);
             if (!response.IsSuccess)
                 return BadRequest(response);
             return Ok(response);
