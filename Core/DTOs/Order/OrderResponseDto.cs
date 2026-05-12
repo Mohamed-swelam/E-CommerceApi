@@ -12,6 +12,9 @@ namespace Core.DTOs.Order
         public decimal TotalAmount { get; set; }
         public OrderStatus Status { get; set; }
         public required string ShippingAddress { get; set; }
+        public int TotalItems { get; set; }
+        public decimal SubTotal { get; set; }
+        public decimal ShippingFees { get; set; }
         public string UserId { get; set; }
         public List<OrderItemResponseDto> OrderItems { get; set; } = new List<OrderItemResponseDto>();
     }

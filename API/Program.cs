@@ -60,31 +60,36 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ISellerService, SellerService>();
-builder.Services.AddScoped<JwtHelper>();
-
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<JwtHelper>();
-
+//Repositories
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+//services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISellerService, SellerService>();
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+//helpers
+builder.Services.AddScoped<JwtHelper>();
+builder.Services.AddScoped<ImageHelper>();
+
 builder.Services.AddAutoMapper(c =>
 {
     c.AddProfile<ProductMappingProfile>();
     c.AddProfile<CategoryMappingProfile>();
 }, typeof(ProductMappingProfile).Assembly);
 
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-builder.Services.AddScoped<IStripeService, StripeService>();
-builder.Services.AddScoped<ImageHelper>();
 
 // ===== Controllers =====
 builder.Services.AddControllers()
@@ -121,7 +126,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+//inialization
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -135,8 +140,8 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.SeedAdminAsync(userManager, roleManager);
 }
 
-app.UseMiddleware<ExceptionMiddleware>();     
-app.UseMiddleware<RequestLoggingMiddleware>(); 
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
