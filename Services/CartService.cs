@@ -21,7 +21,7 @@ namespace Services
         {
             var cart = await _repository.GetAsync(
                 c => c.UserId == userId,
-                includeProperties: "Items,Items.Product"
+                includeProperties: "Items,Items.Product,Items.Product.ImagesNames"
             );
 
             if (cart == null)
@@ -30,13 +30,14 @@ namespace Services
             return new CartResponseDto
             {
                 CartId = cart.CartId,
+                TotalItems = cart.Items.Sum(i => i.Quantity),
                 Items = cart.Items.Select(i => new CartItemResponseDto
                 {
                     ProductId = i.ProductId,
                     ProductName = i.Product?.Name ?? "No Name",
                     Price = i.Product?.Price ?? 0,
-                    Quantity = i.Quantity
-                    //Remeber to add ImageUrl property to Product model and set it here
+                    Quantity = i.Quantity,
+                    ImageUrl = i.Product?.ImagesNames?.FirstOrDefault(i=>i.IsMain)?.ImageName ?? "No Image"
                 }).ToList()
             };
         }
