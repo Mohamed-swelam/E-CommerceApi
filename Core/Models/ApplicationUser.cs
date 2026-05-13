@@ -11,8 +11,7 @@ namespace Core.Models
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 50 characters")]
         public string FullName { get; set; }
 
-        public byte[]? Image { get; set; }
-
+        public string? ImagePath { get; set; }
         public bool IsDeleted { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

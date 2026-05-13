@@ -16,7 +16,7 @@ namespace Core.Models
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }
 
-        public byte[] Logo { get; set; }
+        public string? Logo { get; set; }
 
         [Required(ErrorMessage = "Store name is Required")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Store name must be between 2 and 100 characters")]
