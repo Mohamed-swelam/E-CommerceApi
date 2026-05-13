@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Beauty",
+    "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS54J7fKIE0FuMK_V0LpRkDjbhnGQcnEROLfg&s"
+  },
+  {
+    "name": "Fragrances",
+    "icon": "https://cdn-icons-png.flaticon.com/512/9361/9361223.png"
+  },
+  {
+    "name": "Furniture",
+    "icon": "https://cdn-icons-png.flaticon.com/512/1198/1198317.png"
+  },
+  {
+    "name": "Groceries",
+    "icon": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6tg2fhfNTbeEkz8hAM-JiekUpLf_vCgiMzw&s"
+  }
+]

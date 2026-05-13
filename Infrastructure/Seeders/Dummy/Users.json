@@ -1,0 +1,94 @@
+{
+  "sellers": [
+    {
+      "userName": "seller1@gmail.com",
+      "fullName": "Olivia Beauty",
+      "email": "seller1@gmail.com",
+      "emailConfirmed": true,
+      "password": "Seller@123",
+      "role": "Seller"
+    },
+    {
+      "userName": "seller2@gmail.com",
+      "fullName": "Ethan Fragrance",
+      "email": "seller2@gmail.com",
+      "emailConfirmed": true,
+      "password": "Seller@123",
+      "role": "Seller"
+    },
+    {
+      "userName": "seller3@gmail.com",
+      "fullName": "Liam Furniture",
+      "email": "seller3@gmail.com",
+      "emailConfirmed": true,
+      "password": "Seller@123",
+      "role": "Seller"
+    },
+    {
+      "userName": "seller4@gmail.com",
+      "fullName": "Sophia Grocery",
+      "email": "seller4@gmail.com",
+      "emailConfirmed": true,
+      "password": "Seller@123",
+      "role": "Seller"
+    },
+    {
+      "userName": "seller5@gmail.com",
+      "fullName": "Noah Home",
+      "email": "seller5@gmail.com",
+      "emailConfirmed": true,
+      "password": "Seller@123",
+      "role": "Seller"
+    }
+  ],
+  "customers": [
+    {
+      "userName": "customer1@gmail.com",
+      "fullName": "Mason Carter",
+      "email": "customer1@gmail.com",
+      "emailConfirmed": true,
+      "password": "User@123",
+      "role": "Customer"
+    },
+    {
+      "userName": "customer2@gmail.com",
+      "fullName": "Emma Wilson",
+      "email": "customer2@gmail.com",
+      "emailConfirmed": true,
+      "password": "User@123",
+      "role": "Customer"
+    },
+    {
+      "userName": "customer3@gmail.com",
+      "fullName": "James Anderson",
+      "email": "customer3@gmail.com",
+      "emailConfirmed": true,
+      "password": "User@123",
+      "role": "Customer"
+    },
+    {
+      "userName": "customer4@gmail.com",
+      "fullName": "Charlotte Brown",
+      "email": "customer4@gmail.com",
+      "emailConfirmed": true,
+      "password": "User@123",
+      "role": "Customer"
+    },
+    {
+      "userName": "customer5@gmail.com",
+      "fullName": "Benjamin Taylor",
+      "email": "customer5@gmail.com",
+      "emailConfirmed": true,
+      "password": "User@123",
+      "role": "Customer"
+    }
+  ],
+  "admin": {
+    "userName": "admin@store.com",
+    "fullName": "System Admin",
+    "email": "admin@store.com",
+    "emailConfirmed": true,
+    "password": "Admin@123",
+    "role": "Admin"
+  }
+}

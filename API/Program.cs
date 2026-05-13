@@ -141,21 +141,15 @@ using (var scope = app.Services.CreateScope())
         services.GetRequiredService<AppDbContext>();
 
     var userManager =
-        services.GetRequiredService
-        <UserManager<ApplicationUser>>();
+        services.GetRequiredService<UserManager<ApplicationUser>>();
 
     var roleManager =
-        services.GetRequiredService
-        <RoleManager<IdentityRole>>();
+        services.GetRequiredService<RoleManager<IdentityRole>>();
 
-    await DbInitializer.SeedAdminAsync(
+    await AppDbInitializer.SeedAsync(
+        context,
         userManager,
         roleManager);
-
-    //await AppDbInitializer.SeedAsync(
-    //    context,
-    //    userManager,
-    //    roleManager);
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
