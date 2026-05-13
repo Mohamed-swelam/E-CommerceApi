@@ -15,6 +15,7 @@ namespace Services
         private readonly IProductRepository productRepository;
         private readonly IStripeService stripeService;
         private readonly IPaymentRepository paymentRepository;
+        private const decimal ShippingFees = 50;
 
         public OrderService(
             IOrderRepository orderRepository,
@@ -39,11 +40,11 @@ namespace Services
                 var orders = await orderRepository
                     .GetAll( o => o.UserId == userId,
                         includeProperties: "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames")
+                    .OrderByDescending(o => o.OrderDate)
                     .ToListAsync();
 
                 var orderDtos = orders.Select(o =>
                 {
-                    decimal shippingFees = 50;
 
                     decimal subTotal =
                         o.OrderItems.Sum(i => i.Price * i.Quantity);
@@ -65,9 +66,9 @@ namespace Services
 
                         SubTotal = subTotal,
 
-                        ShippingFees = shippingFees,
+                        ShippingFees = ShippingFees,
 
-                        TotalAmount = subTotal + shippingFees,
+                        TotalAmount = subTotal + ShippingFees,
 
                         OrderItems = o.OrderItems.Select(oi =>
                             new OrderItemResponseDto
@@ -131,8 +132,6 @@ namespace Services
                     return response;
                 }
 
-                decimal shippingFees = 50;
-
                 decimal subTotal =
                     order.OrderItems.Sum(i => i.Price * i.Quantity);
 
@@ -153,9 +152,9 @@ namespace Services
 
                     SubTotal = subTotal,
 
-                    ShippingFees = shippingFees,
+                    ShippingFees = ShippingFees,
 
-                    TotalAmount = subTotal + shippingFees,
+                    TotalAmount = subTotal + ShippingFees,
 
                     OrderItems = order.OrderItems.Select(oi =>
                         new OrderItemResponseDto
@@ -196,17 +195,42 @@ namespace Services
             }
         }
 
-        public async Task<GeneralResponse> CreateOrderAsync(
-            CreateOrderRequestDto dto,
-            string userId)
+        public async Task<GeneralResponse> CreateOrderAsync(CreateOrderRequestDto dto,string? userId,string? guestId)
         {
             var response = new GeneralResponse();
 
             try
             {
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    if (string.IsNullOrWhiteSpace(dto.GuestName))
+                    {
+                        response.IsSuccess = false;
+                        response.Data = "Guest name is required.";
+
+                        return response;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(dto.GuestEmail))
+                    {
+                        response.IsSuccess = false;
+                        response.Data = "Guest email is required.";
+
+                        return response;
+                    }
+                }
+
+
                 var hasPendingOrder = await orderRepository.GetAsync(
-                    o => o.UserId == userId &&
-                         o.Status == OrderStatus.Pending);
+                    o =>
+                        (
+                            !string.IsNullOrEmpty(userId)
+                            ? o.UserId == userId
+                            : o.GuestEmail == dto.GuestEmail
+                        )
+                        &&
+                        o.Status == OrderStatus.Pending);
 
                 if (hasPendingOrder != null)
                 {
@@ -218,7 +242,9 @@ namespace Services
                 }
 
                 var cart = await cartRepository.GetAsync(
-                    c => c.UserId == userId,
+                    c=>!string.IsNullOrEmpty(userId)
+                        ? c.UserId == userId
+                        : c.GuestId == guestId,
                     includeProperties: "Items,Items.Product");
 
                 if (cart == null || !cart.Items.Any())
@@ -243,6 +269,14 @@ namespace Services
                         return response;
                     }
 
+                    if (item.Quantity <= 0)
+                    {
+                        response.IsSuccess = false;
+                        response.Data = "Invalid quantity.";
+
+                        return response;
+                    }
+
                     if (item.Quantity > item.Product.StockQuantity)
                     {
                         response.IsSuccess = false;
@@ -263,6 +297,8 @@ namespace Services
                     });
                 }
 
+                totalAmount += ShippingFees;
+
                 var paymentIntent =
                     await stripeService
                     .CreatePaymentIntent(totalAmount);
@@ -271,6 +307,8 @@ namespace Services
                 {
                     UserId = userId,
                     ShippingAddress = dto.ShippingAddress,
+                    GuestEmail = dto.GuestEmail,
+                    GuestName = dto.GuestName,
                     OrderDate = DateTime.UtcNow,
                     Status = OrderStatus.Pending,
                     TotalAmount = totalAmount,
@@ -280,6 +318,7 @@ namespace Services
                 order.Payment = new Payment
                 {
                     Amount = totalAmount,
+                    
                     TransactionId = paymentIntent.Id,
                     ClientSecret = paymentIntent.ClientSecret,
                     PaymentMethod = "Card",

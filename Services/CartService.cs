@@ -43,10 +43,6 @@ namespace Services
                 TotalItems =
                     cart.Items.Sum(i => i.Quantity),
 
-                TotalPrice =
-                    cart.Items.Sum(i =>
-                        (i.Product!.Price * i.Quantity)),
-
                 Items = cart.Items.Select(i =>
                     new CartItemResponseDto
                     {
@@ -69,7 +65,7 @@ namespace Services
 
                             i.Product?.ImagesNames
                             .FirstOrDefault()
-                            ?.ImageName
+                            ?.ImageName ?? ""
                     }).ToList()
             };
         }

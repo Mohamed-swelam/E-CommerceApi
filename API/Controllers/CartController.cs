@@ -1,10 +1,6 @@
 ﻿using Core.DTOs.Cart;
-using Core.DTOs.GeneralDto;
 using Core.Helpers;
 using Core.Interfaces.Services;
-using Core.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

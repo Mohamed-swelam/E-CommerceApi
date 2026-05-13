@@ -9,7 +9,7 @@ namespace Core.Interfaces.Services
 
         Task<GeneralResponse> GetOrderByIdAsync(int id, string userId);
 
-        Task<GeneralResponse> CreateOrderAsync(CreateOrderRequestDto dto,string userId);
+        Task<GeneralResponse> CreateOrderAsync(CreateOrderRequestDto dto, string? userId, string? guestId);
 
         Task<GeneralResponse> CancelOrderAsync(int id,string userId);
         Task<GeneralResponse> GetOrderStatusAsync(int id, string userId);
