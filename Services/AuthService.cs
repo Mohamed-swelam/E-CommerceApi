@@ -27,19 +27,21 @@ namespace Services
         private readonly IEmailService _emailService;
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
+        private readonly ICartService cartService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailService emailService,
             AppDbContext context,
-            IConfiguration config)
+            IConfiguration config,ICartService cartService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
             _context = context;
             _config = config;
+            this.cartService = cartService;
         }
 
         public async Task<GeneralResponse> RegisterAsync(RegisterDto dto)
@@ -70,7 +72,7 @@ namespace Services
         }
 
         
-        public async Task<GeneralResponse> LoginAsync(LoginDto dto)
+        public async Task<GeneralResponse> LoginAsync(LoginDto dto,string? guestId)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
@@ -105,6 +107,11 @@ namespace Services
             await _context.SaveChangesAsync();
 
             var roles = await _userManager.GetRolesAsync(user);
+
+            if (!string.IsNullOrEmpty(guestId))
+            {
+                await cartService.MergeGuestCartAsync(user.Id,guestId);
+            }
 
             return Ok(new
             {

@@ -15,6 +15,7 @@ namespace Core.Interfaces.Services
         Task<GeneralResponse> RemoveCartItemAsync(int productId, string? userId, string? guestId);
 
         Task<GeneralResponse> ClearCartAsync(string? userId, string? guestId);
+        Task MergeGuestCartAsync(string userId,string guestId);
     }
 
 }

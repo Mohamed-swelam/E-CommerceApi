@@ -298,5 +298,63 @@ namespace Services
                 Data = "Cart cleared successfully"
             };
         }
+
+
+        public async Task MergeGuestCartAsync(string userId, string guestId)
+        {
+            // Guest cart
+            var guestCart = await repository.GetAsync(
+                c => c.GuestId == guestId,
+                includeProperties: "Items");
+
+            if (guestCart == null)
+                return;
+
+            // User cart
+            var userCart = await repository.GetAsync(
+                c => c.UserId == userId,
+                includeProperties: "Items");
+
+            if (userCart == null)
+            {
+                guestCart.UserId = userId;
+
+                guestCart.GuestId = null;
+
+                repository.Update(guestCart);
+
+                await repository.SaveChangesAsync();
+
+                return;
+            }
+
+            // merge items
+            foreach (var guestItem in guestCart.Items)
+            {
+                var existingItem =
+                    userCart.Items.FirstOrDefault(
+                        i => i.ProductId == guestItem.ProductId);
+
+                if (existingItem != null)
+                {
+                    existingItem.Quantity +=
+                        guestItem.Quantity;
+                }
+                else
+                {
+                    userCart.Items.Add(new CartItem
+                    {
+                        ProductId = guestItem.ProductId,
+                        Quantity = guestItem.Quantity
+                    });
+                }
+            }
+
+            repository.Update(userCart);
+
+            repository.Delete(guestCart);
+
+            await repository.SaveChangesAsync();
+        }
     }
 }
