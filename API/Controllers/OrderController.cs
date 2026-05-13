@@ -8,7 +8,6 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService orderService;
@@ -18,6 +17,7 @@ namespace API.Controllers
             this.orderService = orderService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
@@ -43,6 +43,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
@@ -69,8 +70,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder(
-            [FromBody] CreateOrderRequestDto dto)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto dto)
         {
             if (!ModelState.IsValid)
             {
@@ -83,17 +83,11 @@ namespace API.Controllers
 
             var userId = User.GetUserId();
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new
-                {
-                    IsSuccess = false,
-                    Data = "User is not authenticated."
-                });
-            }
+            var guestId =
+                GuestHelper.GetGuestId(HttpContext);
 
             var result =
-                await orderService.CreateOrderAsync(dto, userId);
+                await orderService.CreateOrderAsync(dto, userId, guestId);
 
             if (!result.IsSuccess)
             {
@@ -103,6 +97,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> CancelOrder(int id)
         {
@@ -128,9 +123,9 @@ namespace API.Controllers
             return Ok(result);
         }
 
-
+        [Authorize]
         [HttpGet("{id:int}/status")]
-        public async Task<IActionResult> GetOrderStatus(int orderId)
+        public async Task<IActionResult> GetOrderStatus(int id)
         {
             var userId = User.GetUserId();
 
@@ -144,7 +139,7 @@ namespace API.Controllers
             }
 
             var result =
-                await orderService.GetOrderStatusAsync(orderId, userId);
+                await orderService.GetOrderStatusAsync(id, userId);
 
             if (!result.IsSuccess)
             {

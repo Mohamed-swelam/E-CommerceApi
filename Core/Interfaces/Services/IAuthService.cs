@@ -1,16 +1,13 @@
 ﻿using Core.DTOs.Account;
 using Core.DTOs.Auth;
 using Core.DTOs.GeneralDto;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Core.Interfaces.Services
 {
     public interface IAuthService
     {
         Task<GeneralResponse> RegisterAsync(RegisterDto dto);
-        Task<GeneralResponse> LoginAsync(LoginDto dto);
+        Task<GeneralResponse> LoginAsync(LoginDto dto, string? guestId);
         Task<GeneralResponse> LogoutAsync(string userId);
         Task<GeneralResponse> ConfirmEmailAsync(ConfirmEmailDto dto);
         Task<GeneralResponse> ResendConfirmationCodeAsync(string email);
