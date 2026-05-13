@@ -19,9 +19,22 @@ using Stripe;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+const string AngularCorsPolicy = "AngularClient";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(AngularCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200", "https://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -152,18 +165,19 @@ using (var scope = app.Services.CreateScope())
         userManager,
         roleManager);
 
-    //await AppDbInitializer.SeedAsync(
-    //    context,
-    //    userManager,
-    //    roleManager);
+    await AppDbInitializer.SeedAsync(
+        context,
+        userManager,
+        roleManager);
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors(AngularCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
 app.UseStaticFiles();
+app.MapControllers();
 
 app.Run();
