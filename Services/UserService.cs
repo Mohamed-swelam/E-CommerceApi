@@ -1,21 +1,21 @@
 ﻿using Core.DTOs.GeneralDto;
 using Core.DTOs.user;
+using Core.Interfaces.Helpers;
 using Core.Interfaces.Services;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace Services
 {
     public class UserService : IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-
-        public UserService(UserManager<ApplicationUser> userManager)
+        private readonly IImageHelper _imageHelper;
+        public UserService(UserManager<ApplicationUser> userManager, IImageHelper imageHelper)
         {
             _userManager = userManager;
+            _imageHelper = imageHelper;
         }
 
         public async Task<GeneralResponse> GetProfileAsync(string userId)
@@ -33,7 +33,7 @@ namespace Services
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber,
                 Address = user.Address,
-                ImageBase64 = user.Image != null ? Convert.ToBase64String(user.Image) : null,
+                ImagePath = user.ImagePath, 
                 Role = roles.FirstOrDefault() ?? "Customer",
                 CreatedAt = user.CreatedAt
             });
@@ -57,9 +57,11 @@ namespace Services
 
             if (dto.Image != null)
             {
-                using var ms = new MemoryStream();
-                await dto.Image.CopyToAsync(ms);
-                user.Image = ms.ToArray();
+                if (!string.IsNullOrEmpty(user.ImagePath))
+                    _imageHelper.DeleteImage(user.ImagePath, "images/users");
+
+                var imageName = await _imageHelper.SaveImageAsync(dto.Image, "images/users");
+                user.ImagePath = $"images/users/{imageName}";
             }
 
             user.UpdatedAt = DateTime.UtcNow;
@@ -71,7 +73,7 @@ namespace Services
 
             return Ok("Profile updated successfully.");
         }
-        
+
         private GeneralResponse Ok(object data) => new() { IsSuccess = true, Data = data };
         private GeneralResponse Fail(object data) => new() { IsSuccess = false, Data = data };
     }
