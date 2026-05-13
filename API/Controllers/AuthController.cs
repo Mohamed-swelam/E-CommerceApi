@@ -1,5 +1,6 @@
 ﻿using Core.DTOs.Account;
 using Core.DTOs.Auth;
+using Core.Helpers;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -26,8 +27,15 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var result = await _authService.LoginAsync(dto);
-            return result.IsSuccess ? Ok(result) : Unauthorized(result);
+            var guestId =GuestHelper.GetGuestId(HttpContext);
+
+            var result =await _authService.LoginAsync(dto,guestId);
+            if (!result.IsSuccess)
+            {
+                return Unauthorized(result);
+            }
+            Response.Cookies.Delete("GuestId");
+            return Ok(result);
         }
 
         [HttpPost("confirm-email")]

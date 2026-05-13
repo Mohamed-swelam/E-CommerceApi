@@ -15,5 +15,7 @@ namespace Core.Models
         public ApplicationUser? User { get; set; }
 
         public ICollection<CartItem> Items { get; set; } = new HashSet<CartItem>();
+
+        public string? GuestId { get; set; }
     }
 }

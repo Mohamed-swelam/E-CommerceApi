@@ -32,5 +32,10 @@ namespace Core.Models
         public Payment? Payment { get; set; }
 
         public Shipping? Shipping { get; set; }
+
+
+        public string? GuestName { get; set; }
+
+        public string? GuestEmail{get; set;} 
     }
 }
