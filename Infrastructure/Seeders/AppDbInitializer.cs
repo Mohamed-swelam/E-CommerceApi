@@ -1,7 +1,9 @@
 ﻿using Core.Models;
 using Infrastructure.Data;
+using Infrastructure.Seeders.SeedingHelpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Infrastructure.Seeders
 {
@@ -12,175 +14,189 @@ namespace Infrastructure.Seeders
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager)
         {
-            await context.Database.MigrateAsync();
+            string[] roles = { "Admin", "Seller", "Customer" };
 
-            // Roles
-            if (!await roleManager.RoleExistsAsync("Admin"))
-                await roleManager.CreateAsync(
-                    new IdentityRole("Admin"));
-
-            if (!await roleManager.RoleExistsAsync("Seller"))
-                await roleManager.CreateAsync(
-                    new IdentityRole("Seller"));
-
-            if (!await roleManager.RoleExistsAsync("Customer"))
-                await roleManager.CreateAsync(
-                    new IdentityRole("Customer"));
-
-            //users
-            var sellersCount = await userManager
-                .GetUsersInRoleAsync("Seller");
-            if (!sellersCount.Any())
+            foreach (var role in roles)
             {
-                // Seller 1
-                var seller1 = new ApplicationUser
+                if (!await roleManager.RoleExistsAsync(role))
                 {
-                    UserName = "seller1@gmail.com",
-                    FullName = "Seller One",
-                    Email = "seller1@gmail.com",
-                    EmailConfirmed = true
-                };
+                    await roleManager.CreateAsync(
+                        new IdentityRole(role));
+                }
+            }
 
-                await userManager.CreateAsync(
-                    seller1,
-                    "Seller@123");
+            if (!userManager.Users.Any())
+            {
+                var usersPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
+                    "Seeders",
+                    "Dummy",
+                    "Users.json");
 
-                await userManager.AddToRoleAsync(
-                    seller1,
-                    "Seller");
+                var usersData =
+                    await ReadJsonAsync<UsersSeedRoot>(
+                        usersPath);
 
-                // Seller 2
-                var seller2 = new ApplicationUser
+                var allUsers = new List<SeedUserDto>();
+
+                allUsers.AddRange(usersData.Sellers);
+                allUsers.AddRange(usersData.Customers);
+                allUsers.Add(usersData.Admin);
+
+                foreach (var item in allUsers)
                 {
-                    UserName = "seller2@gmail.com",
-                    FullName = "Seller Two",
-                    Email = "seller2@gmail.com",
-                    EmailConfirmed = true
-                };
-
-                await userManager.CreateAsync(
-                    seller2,
-                    "Seller@123");
-
-                await userManager.AddToRoleAsync(
-                    seller2,
-                    "Seller");
-
-                // Customer 1
-                var customer1 = new ApplicationUser
-                {
-                    UserName = "user1@gmail.com",
-                    FullName = "User One",
-                    Email = "user1@gmail.com",
-                    EmailConfirmed = true
-                };
-
-                await userManager.CreateAsync(
-                    customer1,
-                    "User@123");
-
-                await userManager.AddToRoleAsync(
-                    customer1,
-                    "Customer");
-
-                // Customer 2
-                var customer2 = new ApplicationUser
-                {
-                    UserName = "user2@gmail.com",
-                    FullName = "User Two",
-                    Email = "user2@gmail.com",
-                    EmailConfirmed = true
-                };
-
-                await userManager.CreateAsync(
-                    customer2,
-                    "User@123");
-
-                await userManager.AddToRoleAsync(
-                    customer2,
-                    "Customer");
-
-                //seller profiles
-
-                var sellerProfile1 = new Sellerprofile
-                {
-                    StoreName = "Tech Store",
-                    //Logo = new byte[] { 1, 2, 3 },
-                    Description = "Description one",
-                    UserId = seller1.Id
-                };
-
-                var sellerProfile2 = new Sellerprofile
-                {
-                    StoreName = "Mobile Shop",
-                    //Logo = new byte[] { 1, 2, 3 },
-                    Description = "Description two",
-                    UserId = seller2.Id
-                };
-
-                context.Sellers.AddRange(
-                    sellerProfile1,
-                    sellerProfile2);
-
-                await context.SaveChangesAsync();
-
-                //categories
-
-                var electronics = new Category
-                {
-                    Name = "Electronics"
-                };
-
-                var fashion = new Category
-                {
-                    Name = "Fashion"
-                };
-
-                context.Categories.AddRange(
-                    electronics,
-                    fashion);
-
-                await context.SaveChangesAsync();
-
-                //products
-
-                var products = new List<Product>
-                {
-                    new Product
+                    var user = new ApplicationUser
                     {
-                        Name = "IPhone 15",
-                        Description = "Apple mobile phone",
-                        Price = 50000,
-                        StockQuantity = 10,
-                        CategoryId = electronics.CategoryId,
-                        SellerProfileId = sellerProfile1.Id
-                    },
+                        UserName = item.UserName,
+                        FullName = item.FullName,
+                        Email = item.Email,
+                        EmailConfirmed = item.EmailConfirmed
+                    };
 
-                    new Product
-                    {
-                        Name = "Samsung S24",
-                        Description = "Samsung mobile phone",
-                        Price = 42000,
-                        StockQuantity = 15,
-                        CategoryId = electronics.CategoryId,
-                        SellerProfileId = sellerProfile1.Id
-                    },
+                    var result = await userManager.CreateAsync(
+                        user,
+                        item.Password);
 
-                    new Product
+                    if (result.Succeeded)
                     {
-                        Name = "T-Shirt",
-                        Description = "Cotton T-Shirt",
-                        Price = 500,
-                        StockQuantity = 50,
-                        CategoryId = fashion.CategoryId,
-                        SellerProfileId = sellerProfile2.Id
+                        await userManager.AddToRoleAsync(
+                            user,
+                            item.Role);
                     }
-                };
+                }
+            }
 
-                context.Products.AddRange(products);
+            if (!context.Categories.Any())
+            {
+                var categoriesPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
+                    "Seeders",
+                    "Dummy",
+                    "Categories.json");
+
+                var categories =
+                    await ReadJsonAsync<List<Category>>(
+                        categoriesPath);
+
+                context.Categories.AddRange(categories);
 
                 await context.SaveChangesAsync();
             }
+
+            if (!context.Sellers.Any())
+            {
+                var sellerProfilesPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
+                    "Seeders",
+                    "Dummy",
+                    "SellerProfiles.json");
+
+                var sellerProfiles =
+                    await ReadJsonAsync<List<SellerProfileSeedDto>>(
+                        sellerProfilesPath);
+
+                foreach (var item in sellerProfiles)
+                {
+                    var user =
+                        await userManager.FindByEmailAsync(
+                            item.UserEmail);
+
+                    if (user == null)
+                        continue;
+
+                    var sellerProfile = new Sellerprofile
+                    {
+                        StoreName = item.StoreName,
+                        Logo = item.Logo,
+                        Description = item.Description,
+                        UserId = user.Id,
+                        IsApproved = item.IsApproved,
+                        TotalEarnings = item.TotalEarnings
+                    };
+
+                    context.Sellers.Add(sellerProfile);
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Products.Any())
+            {
+                var productsPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
+                    "Seeders",
+                    "Dummy",
+                    "Products.json");
+
+                var products =
+                    await ReadJsonAsync<List<ProductSeedDto>>(
+                        productsPath);
+
+                foreach (var item in products)
+                {
+                    var sellerProfile = await context.Sellers
+                        .FirstOrDefaultAsync(s =>
+                            s.StoreName ==
+                            item.SellerStoreName);
+
+                    if (sellerProfile == null)
+                        continue;
+
+                    var product = new Product
+                    {
+                        Name = item.Name,
+                        Description = item.Description,
+                        Price = item.Price,
+                        StockQuantity = item.StockQuantity,
+                        CategoryId = item.CategoryId,
+                        SellerProfileId =
+                            sellerProfile.Id,
+
+                        ImagesNames = item.ImagesNames
+                            .Select(i => new ProductImage
+                            {
+                                ImageName = i.ImageName,
+                                IsMain = i.IsMain
+                           })
+                        .ToList()
+                    };
+
+                    context.Products.Add(product);
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+
+        }
+
+
+        private static async Task<T?> ReadJsonAsync<T>(string path)
+        {
+            if (!File.Exists(path))
+            {
+                Console.WriteLine($"File Not Found: {path}");
+                return default;
+            }
+
+            var json = await File.ReadAllTextAsync(path);
+
+            Console.WriteLine(json);
+
+            return JsonSerializer.Deserialize<T>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
     }
 }

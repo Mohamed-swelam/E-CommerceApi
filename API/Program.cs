@@ -154,16 +154,10 @@ using (var scope = app.Services.CreateScope())
         services.GetRequiredService<AppDbContext>();
 
     var userManager =
-        services.GetRequiredService
-        <UserManager<ApplicationUser>>();
+        services.GetRequiredService<UserManager<ApplicationUser>>();
 
     var roleManager =
-        services.GetRequiredService
-        <RoleManager<IdentityRole>>();
-
-    await DbInitializer.SeedAdminAsync(
-        userManager,
-        roleManager);
+        services.GetRequiredService<RoleManager<IdentityRole>>();
 
     await AppDbInitializer.SeedAsync(
         context,

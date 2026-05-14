@@ -1,0 +1,42 @@
+﻿[
+  {
+    "storeName": "Glow Beauty Store",
+    "logo": "https://www.theglowbeautyshop.com/cdn/shop/files/DO_NOT_MODIFY.png?v=1753814994",
+    "description": "Premium beauty and skincare products with top makeup brands.",
+    "userEmail": "seller1@gmail.com",
+    "isApproved": true,
+    "totalEarnings": 0
+  },
+  {
+    "storeName": "Luxury Fragrance House",
+    "logo": "https://static.vecteezy.com/system/resources/previews/073/923/477/non_2x/sophisticated-perfume-house-logo-perfect-for-luxury-branding-marketing-and-cosmetic-product-design-projects-vector.jpg",
+    "description": "Exclusive perfumes and luxury fragrance collections for all occasions.",
+    "userEmail": "seller2@gmail.com",
+    "isApproved": true,
+    "totalEarnings": 0
+  },
+  {
+    "storeName": "Modern Furniture Hub",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7PqCI11nKxo1LTKd8CXJgxbhy1kBri8yy4Q&s",
+    "description": "Elegant furniture and modern home decor for stylish living spaces.",
+    "userEmail": "seller3@gmail.com",
+    "isApproved": true,
+    "totalEarnings": 0
+  },
+  {
+    "storeName": "Fresh Grocery Market",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkc084LDlRQks2ChvQzxELUee-ykQz2m_uNQ&s",
+    "description": "Fresh groceries, vegetables, fruits, and daily essentials delivered fast.",
+    "userEmail": "seller4@gmail.com",
+    "isApproved": true,
+    "totalEarnings": 0
+  },
+  {
+    "storeName": "Home & Kitchen Essentials",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_hZareSEBf1zbmUzlMFvsERvLW1GHfnfeBg&s",
+    "description": "Kitchen tools, home supplies, and useful everyday household products.",
+    "userEmail": "seller5@gmail.com",
+    "isApproved": true,
+    "totalEarnings": 0
+  }
+]

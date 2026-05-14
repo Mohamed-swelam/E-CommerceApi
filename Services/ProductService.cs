@@ -82,7 +82,7 @@ namespace Services
         public async Task<GeneralResponse> GetProductByIdAsync(int productId)
         {
             // Check if the product exists
-            var product = await _repository.GetAsync(p => p.ProductId == productId, "Category,Images,Reviews,SellerProfile");
+            var product = await _repository.GetAsync(p => p.ProductId == productId, "Category,ImagesNames,Reviews,SellerProfile");
             if (product == null)
                 return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
             return new GeneralResponse
@@ -93,7 +93,7 @@ namespace Services
         }
         public async Task<GeneralResponse> GetAllProductsAsync(ProductFilterDto filter)
         {
-            var query = _repository.GetAll(includeProperties: "Category,Images,SellerProfile");
+            var query = _repository.GetAll(includeProperties: "Category,ImagesNames,SellerProfile");
             // Search
             if (!string.IsNullOrEmpty(filter.Search))
                 query = query.Where(p => p.Name.Contains(filter.Search));
@@ -138,7 +138,7 @@ namespace Services
         public async Task<GeneralResponse> AddProductImageAsync(int productId, IFormFile image, string userId)
         {
             // Check if the product exists
-            var product = await _repository.GetAsync(p => p.ProductId == productId, includeProperties: "Images,SellerProfile");
+            var product = await _repository.GetAsync(p => p.ProductId == productId, includeProperties: "ImagesNames,SellerProfile");
             if (product == null)
                 return new GeneralResponse { IsSuccess = false, Data = "Product not found" };
             // Verify ownership
