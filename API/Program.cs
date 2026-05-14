@@ -95,12 +95,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISellerService, SellerService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IProductService, Services.ProductService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IReviewService, Services.ReviewService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 //helpers
 builder.Services.AddScoped<JwtHelper>();

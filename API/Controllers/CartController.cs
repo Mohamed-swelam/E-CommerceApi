@@ -30,9 +30,24 @@ namespace API.Controllers
                     guestId);
 
             if (cart == null)
-                return NotFound("Cart is empty");
+            {
+                return Ok(new
+                {
+                    IsSuccess = true,
+                    Data = new
+                    {
+                        CartId = 0,
+                        TotalItems = 0,
+                        Items = new List<object>()
+                    }
+                });
+            }
 
-            return Ok(cart);
+            return Ok(new
+            {
+                IsSuccess = true,
+                Data = cart
+            });
         }
 
         [HttpPost]
