@@ -9,6 +9,12 @@
   <ItemGroup>
     <None Include="Seeders\Dummy\SellerProfiles.json" />
   </ItemGroup>
+	<ItemGroup>
+		<Content Include="Seeders\Dummy\*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
