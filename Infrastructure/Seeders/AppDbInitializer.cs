@@ -28,12 +28,10 @@ namespace Infrastructure.Seeders
             if (!userManager.Users.Any())
             {
                 var usersPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "..",
-                    "Infrastructure",
-                    "Seeders",
-                    "Dummy",
-                    "Users.json");
+    Directory.GetCurrentDirectory(),
+    "Seeders",
+    "Dummy",
+    "Users.json");
 
                 var usersData =
                     await ReadJsonAsync<UsersSeedRoot>(
@@ -71,12 +69,10 @@ namespace Infrastructure.Seeders
             if (!context.Categories.Any())
             {
                 var categoriesPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "..",
-                    "Infrastructure",
-                    "Seeders",
-                    "Dummy",
-                    "Categories.json");
+    Directory.GetCurrentDirectory(),
+    "Seeders",
+    "Dummy",
+    "Categories.json");
 
                 var categories =
                     await ReadJsonAsync<List<Category>>(
@@ -90,12 +86,10 @@ namespace Infrastructure.Seeders
             if (!context.Sellers.Any())
             {
                 var sellerProfilesPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "..",
-                    "Infrastructure",
-                    "Seeders",
-                    "Dummy",
-                    "SellerProfiles.json");
+    Directory.GetCurrentDirectory(),
+    "Seeders",
+    "Dummy",
+    "SellerProfiles.json");
 
                 var sellerProfiles =
                     await ReadJsonAsync<List<SellerProfileSeedDto>>(
@@ -129,12 +123,10 @@ namespace Infrastructure.Seeders
             if (!context.Products.Any())
             {
                 var productsPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "..",
-                    "Infrastructure",
-                    "Seeders",
-                    "Dummy",
-                    "Products.json");
+    Directory.GetCurrentDirectory(),
+    "Seeders",
+    "Dummy",
+    "Products.json");
 
                 var products =
                     await ReadJsonAsync<List<ProductSeedDto>>(

@@ -1,35 +1,38 @@
+using API.Helpers;
 using API.middelwares;
-using Core.Helpers;
+using Core.Interfaces.Helpers;
 using Core.Interfaces.IRepositories;
 using Core.Interfaces.Services;
-using Core.Interfaces.Helpers;
 using Core.Mappers;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Seeders;
-using API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Services;
-using Stripe;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 const string AngularCorsPolicy = "AngularClient";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterConnection"), sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure();
+    }));
+//DefaultConnection => Local Database
+//MonsterConnection =>publish
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AngularCorsPolicy, policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200", "https://localhost:4200")
+            .WithOrigins("http://localhost:4200", "https://localhost:4200", "https://ecommerceiti.runasp.net")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -139,11 +142,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 //inialization
 using (var scope = app.Services.CreateScope())
