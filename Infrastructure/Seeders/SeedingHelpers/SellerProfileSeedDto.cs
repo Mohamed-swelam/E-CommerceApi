@@ -4,7 +4,7 @@
     {
         public string StoreName { get; set; }
 
-        public byte[] Logo { get; set; }
+        public string Logo { get; set; }
 
         public string Description { get; set; }
 

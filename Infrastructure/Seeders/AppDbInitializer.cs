@@ -165,8 +165,8 @@ namespace Infrastructure.Seeders
                             {
                                 ImageName = i.ImageName,
                                 IsMain = i.IsMain
-                            })
-                            .ToList()
+                           })
+                        .ToList()
                     };
 
                     context.Products.Add(product);
