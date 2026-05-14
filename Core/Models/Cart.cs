@@ -8,9 +8,8 @@ namespace Core.Models
         [Key]
         public int CartId { get; set; }
 
-        [Required]
         [ForeignKey(nameof(User))]
-        public required string UserId { get; set; }
+        public string? UserId { get; set; }
 
         public ApplicationUser? User { get; set; }
 

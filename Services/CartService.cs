@@ -117,6 +117,7 @@ namespace Services
                 };
 
                 await repository.AddAsync(cart);
+                await repository.SaveChangesAsync();
             }
 
             var existingItem = cart.Items
