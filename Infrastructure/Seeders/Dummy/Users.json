@@ -3,6 +3,7 @@
     {
       "userName": "seller1@gmail.com",
       "fullName": "Olivia Beauty",
+      "imagePath": "https://dummyjson.com/icon/emilys/128",
       "email": "seller1@gmail.com",
       "emailConfirmed": true,
       "password": "Seller@123",
@@ -11,6 +12,7 @@
     {
       "userName": "seller2@gmail.com",
       "fullName": "Ethan Fragrance",
+      "imagePath": "https://www.riccilawnc.com/wp-content/uploads/2026/01/Jeremine.webp",
       "email": "seller2@gmail.com",
       "emailConfirmed": true,
       "password": "Seller@123",
@@ -19,6 +21,7 @@
     {
       "userName": "seller3@gmail.com",
       "fullName": "Liam Furniture",
+      "imagePath": "https://randomuser.me/api/portraits/men/4.jpg",
       "email": "seller3@gmail.com",
       "emailConfirmed": true,
       "password": "Seller@123",
@@ -27,6 +30,7 @@
     {
       "userName": "seller4@gmail.com",
       "fullName": "Sophia Grocery",
+      "imagePath": "https://dummyjson.com/icon/sophiab/128",
       "email": "seller4@gmail.com",
       "emailConfirmed": true,
       "password": "Seller@123",
@@ -35,6 +39,7 @@
     {
       "userName": "seller5@gmail.com",
       "fullName": "Noah Home",
+      "imagePath": "https://randomuser.me/api/portraits/men/19.jpg",
       "email": "seller5@gmail.com",
       "emailConfirmed": true,
       "password": "Seller@123",
@@ -45,6 +50,7 @@
     {
       "userName": "customer1@gmail.com",
       "fullName": "Mason Carter",
+      "imagePath": "https://randomuser.me/api/portraits/men/99.jpg",
       "email": "customer1@gmail.com",
       "emailConfirmed": true,
       "password": "User@123",
@@ -53,6 +59,7 @@
     {
       "userName": "customer2@gmail.com",
       "fullName": "Emma Wilson",
+      "imagePath": "https://randomuser.me/api/portraits/women/3.jpg",
       "email": "customer2@gmail.com",
       "emailConfirmed": true,
       "password": "User@123",
@@ -61,6 +68,7 @@
     {
       "userName": "customer3@gmail.com",
       "fullName": "James Anderson",
+      "imagePath": "https://randomuser.me/api/portraits/men/32.jpg",
       "email": "customer3@gmail.com",
       "emailConfirmed": true,
       "password": "User@123",
@@ -69,6 +77,7 @@
     {
       "userName": "customer4@gmail.com",
       "fullName": "Charlotte Brown",
+      "imagePath": "https://dummyjson.com/icon/emmaj/128",
       "email": "customer4@gmail.com",
       "emailConfirmed": true,
       "password": "User@123",
@@ -77,6 +86,7 @@
     {
       "userName": "customer5@gmail.com",
       "fullName": "Benjamin Taylor",
+      "imagePath": "https://randomuser.me/api/portraits/men/33.jpg",
       "email": "customer5@gmail.com",
       "emailConfirmed": true,
       "password": "User@123",
@@ -86,6 +96,7 @@
   "admin": {
     "userName": "admin@store.com",
     "fullName": "System Admin",
+    "imagePath": "https://randomuser.me/api/portraits/men/7.jpg",
     "email": "admin@store.com",
     "emailConfirmed": true,
     "password": "Admin@123",
