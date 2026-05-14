@@ -17,6 +17,6 @@ namespace Core.DTOs.user
         [StringLength(100, ErrorMessage = "Address must be at most 100 characters.")]
         public string? Address { get; set; }
 
-        public string? ImagePath { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }

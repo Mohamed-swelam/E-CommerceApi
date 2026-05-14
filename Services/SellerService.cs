@@ -1,5 +1,6 @@
 ﻿using Core.DTOs.GeneralDto;
 using Core.DTOs.Seller;
+using Core.Interfaces.Helpers;
 using Core.Interfaces.Services;
 using Core.Models;
 using Infrastructure.Data;
@@ -13,11 +14,14 @@ namespace Services
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IImageHelper _imageHelper;
 
-        public SellerService(AppDbContext context, UserManager<ApplicationUser> userManager)
+
+        public SellerService(AppDbContext context, UserManager<ApplicationUser> userManager, IImageHelper imageHelper)
         {
             _context = context;
             _userManager = userManager;
+            _imageHelper = imageHelper;
         }
 
         
@@ -39,16 +43,19 @@ namespace Services
             if (storeExists)
                 return Fail("Store name already taken. Please choose another.");
 
-            byte[]? logoBytes = null;
+            string? logoPath = null;
             if (dto.Logo != null)
-                logoBytes = await ConvertToBytes(dto.Logo);
+            {
+                var imageName = await _imageHelper.SaveImageAsync(dto.Logo, "images/sellers");
+                logoPath = $"images/sellers/{imageName}";
+            }
 
             var seller = new Sellerprofile
             {
                 UserId = userId,
                 StoreName = dto.StoreName,
                 Description = dto.Description,
-                Logo = logoBytes,
+                Logo = logoPath,
                 IsApproved = false,
                 TotalEarnings = 0
             };
@@ -132,7 +139,13 @@ namespace Services
                 seller.Description = dto.Description;
 
             if (dto.Logo != null)
-                seller.Logo = await ConvertToBytes(dto.Logo);
+            {
+                if (!string.IsNullOrEmpty(seller.Logo))
+                    _imageHelper.DeleteImage(seller.Logo, "images/sellers");
+
+                var imageName = await _imageHelper.SaveImageAsync(dto.Logo, "images/sellers");
+                seller.Logo = $"images/sellers/{imageName}";
+            }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
@@ -151,6 +164,9 @@ namespace Services
             if (seller == null)
                 return Fail("Seller profile not found.");
 
+            if (!string.IsNullOrEmpty(seller.Logo))
+                _imageHelper.DeleteImage(seller.Logo, "images/sellers");
+
             _context.Sellers.Remove(seller);
 
             var user = await _userManager.FindByIdAsync(userId);
@@ -167,13 +183,6 @@ namespace Services
             return Ok("Seller account removed successfully.");
         }
 
-        private static async Task<byte[]> ConvertToBytes(IFormFile file)
-        {
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
-            return ms.ToArray();
-        }
-
         private static SellerResponseDto MapToDto(Sellerprofile seller) => new()
         {
             Id = seller.Id,
@@ -182,7 +191,7 @@ namespace Services
             Email = seller.User?.Email ?? string.Empty,
             StoreName = seller.StoreName,
             Description = seller.Description,
-            LogoBase64 = seller.Logo != null ? Convert.ToBase64String(seller.Logo) : null,
+            LogoBase64 = seller.Logo,
             IsApproved = seller.IsApproved,
             TotalEarnings = seller.TotalEarnings,
             TotalProducts = seller.Products?.Count ?? 0
