@@ -405,12 +405,20 @@ namespace Services
 
                 string imageName = await imageHelper.SaveImageAsync(image, MediaSettings.ProductImagesPath);
 
+                if (product.ImagesNames == null)
+                {
+                    product.ImagesNames =
+                        new List<ProductImage>();
+                }
+
                 var productImage = new ProductImage
                 {
                     ProductId = productId,
                     ImageName = imageName,
                     IsMain = !product.ImagesNames.Any()
                 };
+
+
 
                 product.ImagesNames.Add(productImage);
 

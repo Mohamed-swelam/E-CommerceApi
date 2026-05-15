@@ -115,7 +115,7 @@ namespace Services
 
         public async Task<GeneralResponse> UpdateSellerProfileAsync(UpdateSellerDto dto, string userId)
         {
-            var seller = await _context.Sellers
+            var seller = await _context.Sellers.Include(s=>s.Products)
                 .FirstOrDefaultAsync(s => s.UserId == userId);
 
             if (seller == null)
@@ -153,7 +153,7 @@ namespace Services
 
             await _context.SaveChangesAsync();
 
-            return Ok("Seller profile updated successfully.");
+            return Ok(MapToDto(seller));
         }
 
         public async Task<GeneralResponse> DeleteSellerAsync(string userId)
@@ -165,7 +165,7 @@ namespace Services
                 return Fail("Seller profile not found.");
 
             if (!string.IsNullOrEmpty(seller.Logo))
-                _imageHelper.DeleteImage(seller.Logo, "images/sellers");
+                _imageHelper.DeleteImage(Path.GetFileName(seller.Logo),"images/sellers");
 
             _context.Sellers.Remove(seller);
 
@@ -180,7 +180,7 @@ namespace Services
 
             await _context.SaveChangesAsync();
 
-            return Ok("Seller account removed successfully.");
+            return Ok(MapToDto(seller));
         }
 
         private static SellerResponseDto MapToDto(Sellerprofile seller) => new()
@@ -191,7 +191,7 @@ namespace Services
             Email = seller.User?.Email ?? string.Empty,
             StoreName = seller.StoreName,
             Description = seller.Description,
-            LogoBase64 = seller.Logo,
+            Logo = seller.Logo,
             IsApproved = seller.IsApproved,
             TotalEarnings = seller.TotalEarnings,
             TotalProducts = seller.Products?.Count ?? 0

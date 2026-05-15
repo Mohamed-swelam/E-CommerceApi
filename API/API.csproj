@@ -39,4 +39,8 @@
     <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Content Include="wwwroot\**" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+
 </Project>
