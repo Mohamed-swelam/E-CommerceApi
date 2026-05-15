@@ -11,17 +11,30 @@ namespace API.Helpers
         {
             _webHostEnvironment = webHostEnvironment;
         }
-        public async Task<string> SaveImageAsync(IFormFile image, string folder)
+        public async Task<string> SaveImageAsync(IFormFile image,string folder)
         {
-            string imageName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-            string folderPath = Path.Combine(_webHostEnvironment.WebRootPath, folder);
+            string imageName =Guid.NewGuid() + Path.GetExtension(image.FileName);
+
+            string webRootPath = !string.IsNullOrEmpty(_webHostEnvironment.WebRootPath)
+                ? _webHostEnvironment.WebRootPath
+                : Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot");
+            Console.WriteLine($"[ImageHelper] WebRootPath = '{_webHostEnvironment.WebRootPath}'");
+            Console.WriteLine($"[ImageHelper] Saving to: {webRootPath}");
+
+            string folderPath =Path.Combine(webRootPath,folder);
+
             if (!Directory.Exists(folderPath))
+            {
                 Directory.CreateDirectory(folderPath);
-            string fullPath = Path.Combine(folderPath, imageName);
-            using (var stream = new FileStream(fullPath, FileMode.Create))
+            }
+
+            string fullPath =Path.Combine(folderPath,imageName);
+
+            using (var stream =new FileStream(fullPath,FileMode.Create))
             {
                 await image.CopyToAsync(stream);
             }
+
             return imageName;
         }
         public void DeleteImage(string imageName, string folder)

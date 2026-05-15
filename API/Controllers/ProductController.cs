@@ -140,7 +140,7 @@ namespace API.Controllers
         // POST: api/product/{id}/image
         [HttpPost("{id:int}/image")]
         [Authorize(Roles = "Seller,Admin")]
-        public async Task<IActionResult> AddProductImage(int id,IFormFile image)
+        public async Task<IActionResult> AddProductImage(int id,[FromForm] IFormFile image)
         {
             var userId = User.GetUserId();
 
