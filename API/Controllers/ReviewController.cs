@@ -50,5 +50,20 @@ namespace API.Controllers
                 return BadRequest(response);
             return Ok(response);
         }
+
+        // PUT: api/product/{productId}/review/{reviewId}
+        [HttpPut("{reviewId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateReview(int productId, int reviewId, [FromBody] UpdateReviewDto dto)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized();
+
+            var response = await _service.UpdateReviewAsync(productId, reviewId, dto, userId);
+            if (!response.IsSuccess)
+                return BadRequest(response);
+            return Ok(response);
+        }
     }
 }
