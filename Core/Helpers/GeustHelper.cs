@@ -29,9 +29,8 @@ namespace Core.Helpers
 
                     HttpOnly = true,
 
-                    Secure = false,
-
-                    SameSite = SameSiteMode.Lax
+                    Secure = true,
+                    SameSite = SameSiteMode.None
                 });
 
             return guestId;
