@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 const string AngularCorsPolicy = "AngularClient";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MonsterConnection"), sqlOptions =>
     {
         sqlOptions.EnableRetryOnFailure();
     }));
