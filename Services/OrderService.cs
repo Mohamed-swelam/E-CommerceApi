@@ -31,21 +31,23 @@ namespace Services
             this.paymentRepository = paymentRepository;
         }
 
-        public async Task<GeneralResponse> GetAllOrdersAsync(string userId)
+        public async Task<GeneralResponse> GetAllOrdersAsync(string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
             try
             {
                 var orders = await orderRepository
-                    .GetAll(o => o.UserId == userId,
+                    .GetAll(o =>
+                        !string.IsNullOrEmpty(userId)
+                        ? o.UserId == userId
+                        : o.GuestId == guestId,
                         includeProperties: "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames")
                     .OrderByDescending(o => o.OrderDate)
                     .ToListAsync();
 
                 var orderDtos = orders.Select(o =>
                 {
-
                     decimal subTotal =
                         o.OrderItems.Sum(i => i.Price * i.Quantity);
 
@@ -60,6 +62,7 @@ namespace Services
                         ShippingAddress = o.ShippingAddress,
 
                         UserId = o.UserId,
+                        GuestId = o.GuestId,
 
                         TotalItems =
                             o.OrderItems.Sum(i => i.Quantity),
@@ -110,7 +113,7 @@ namespace Services
             }
         }
 
-        public async Task<GeneralResponse> GetOrderByIdAsync(int id, string userId)
+        public async Task<GeneralResponse> GetOrderByIdAsync(int id, string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
@@ -118,7 +121,9 @@ namespace Services
             {
                 var order = await orderRepository.GetAsync(
                     o => o.OrderId == id &&
-                         o.UserId == userId,
+                         !string.IsNullOrEmpty(userId)
+                        ? o.UserId == userId
+                        : o.GuestId == guestId,
                     includeProperties:
                     "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames");
 
@@ -143,6 +148,7 @@ namespace Services
                     ShippingAddress = order.ShippingAddress,
 
                     UserId = order.UserId,
+                    GuestId = order.GuestId,
 
                     TotalItems =
                         order.OrderItems.Sum(i => i.Quantity),
@@ -360,9 +366,7 @@ namespace Services
             }
         }
 
-        public async Task<GeneralResponse> CancelOrderAsync(
-            int id,
-            string userId)
+        public async Task<GeneralResponse> CancelOrderAsync(int id, string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
@@ -370,7 +374,11 @@ namespace Services
             {
                 var order = await orderRepository.GetAsync(
                     o => o.OrderId == id &&
-                         o.UserId == userId,
+                         (
+                             !string.IsNullOrEmpty(userId)
+                                 ? o.UserId == userId
+                                 : o.GuestId == guestId
+                         ),
                     includeProperties: "Payment");
 
                 if (order == null)
