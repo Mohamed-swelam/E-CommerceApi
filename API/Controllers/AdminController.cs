@@ -28,9 +28,23 @@ namespace API.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userManager.Users
+            var dbUsers = await _userManager.Users
                 .Where(u => !u.IsDeleted)
-                .Select(u => new UserDto
+                .ToListAsync();
+
+            var userDtos = new List<UserDto>();
+
+            foreach (var u in dbUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(u);
+                var userRole = roles.FirstOrDefault() ?? u.Role;
+
+                if (string.IsNullOrEmpty(userRole)) userRole = "Customer";
+
+                var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.UserId == u.Id);
+                bool isApproved = seller?.IsApproved ?? false;
+
+                userDtos.Add(new UserDto
                 {
                     Id = u.Id,
                     FullName = u.FullName,
@@ -38,11 +52,14 @@ namespace API.Controllers
                     PhoneNumber = u.PhoneNumber,
                     Address = u.Address,
                     IsDeleted = u.IsDeleted,
-                    CreatedAt = u.CreatedAt
-                })
-                .ToListAsync();
+                    CreatedAt = u.CreatedAt,
+                    Role = userRole,
+                    IsBlocked = u.IsBlocked,
+                    IsSellerApproved = isApproved 
+                });
+            }
 
-            return Ok(new { Success = true, Data = users });
+            return Ok(new { Success = true, Data = userDtos });
         }
 
         [HttpGet("users/{id}")]
@@ -54,6 +71,10 @@ namespace API.Controllers
                 return NotFound(new { Success = false, Message = "User not found" });
 
             var roles = await _userManager.GetRolesAsync(user);
+            var userRole = roles.FirstOrDefault() ?? user.Role;
+            if (string.IsNullOrEmpty(userRole)) userRole = "Customer";
+
+            var seller = await _context.Sellers.FirstOrDefaultAsync(s => s.UserId == user.Id);
 
             return Ok(new
             {
@@ -65,9 +86,11 @@ namespace API.Controllers
                     Email = user.Email!,
                     PhoneNumber = user.PhoneNumber,
                     Address = user.Address,
+                    Role = userRole,
                     IsDeleted = user.IsDeleted,
+                    IsBlocked = user.IsBlocked,
+                    IsSellerApproved = seller?.IsApproved ?? false, 
                     CreatedAt = user.CreatedAt,
-                    Role = roles.FirstOrDefault()
                 }
             });
         }
@@ -77,13 +100,13 @@ namespace API.Controllers
         {
             var user = await _userManager.FindByIdAsync(id);
 
-            if (user == null)
+            if (user == null || user.IsDeleted) 
                 return NotFound(new { Success = false, Message = "User not found" });
 
-            if (user.IsDeleted)
+            if (user.IsBlocked)  
                 return BadRequest(new { Success = false, Message = "User is already blocked" });
 
-            user.IsDeleted = true;
+            user.IsBlocked = true;
             user.UpdatedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(user);
@@ -101,13 +124,13 @@ namespace API.Controllers
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(u => u.Id == id);
 
-            if (user == null)
+            if (user == null || user.IsDeleted) 
                 return NotFound(new { Success = false, Message = "User not found" });
 
-            if (!user.IsDeleted)
+            if (!user.IsBlocked) 
                 return BadRequest(new { Success = false, Message = "User is not blocked" });
 
-            user.IsDeleted = false;
+            user.IsBlocked = false;
             user.UpdatedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(user);
@@ -137,25 +160,43 @@ namespace API.Controllers
         [HttpPut("change-role/{id}")]
         public async Task<IActionResult> ChangeRole(string id, [FromBody] ChangeRoleDto dto)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (currentUserId == id)
+                return BadRequest(new { Success = false, Message = "You cannot change your own role." });
 
+            var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return NotFound(new { Success = false, Message = "User not found" });
 
+            string targetRole = dto.Role?.ToLower() switch
+            {
+                "admin" => "Admin",
+                "seller" => "Seller",
+                _ => "Customer"
+            };
+
+            user.Role = targetRole;
+
             var currentRoles = await _userManager.GetRolesAsync(user);
             await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            await _userManager.AddToRoleAsync(user, dto.Role);
+
+            var result = await _userManager.AddToRoleAsync(user, targetRole);
+
+            if (!result.Succeeded)
+                return BadRequest(new { Success = false, Errors = result.Errors.Select(e => e.Description) });
 
             user.UpdatedAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
-            return Ok(new { Success = true, Message = $"Role changed to {dto.Role}" });
+            return Ok(new { Success = true, Message = $"Role changed to {targetRole} successfully." });
         }
 
         [HttpPut("approve-seller/{sellerId}")]
         public async Task<IActionResult> ApproveSeller(int sellerId)
         {
-            var seller = await _context.Sellers.FindAsync(sellerId);
+            var seller = await _context.Sellers
+                .Include(s => s.User) 
+                .FirstOrDefaultAsync(s => s.Id == sellerId);
 
             if (seller == null)
                 return NotFound(new { Success = false, Message = "Seller not found" });
@@ -165,9 +206,21 @@ namespace API.Controllers
 
             seller.IsApproved = true;
 
+            if (seller.User != null)
+            {
+                seller.User.Role = "Seller";
+
+                var currentRoles = await _userManager.GetRolesAsync(seller.User);
+                await _userManager.RemoveFromRolesAsync(seller.User, currentRoles);
+                await _userManager.AddToRoleAsync(seller.User, "Seller");
+
+                seller.User.UpdatedAt = DateTime.UtcNow;
+                await _userManager.UpdateAsync(seller.User);
+            }
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { Success = true, Message = "Seller approved successfully" });
+            return Ok(new { Success = true, Message = "Seller approved and role updated to Seller successfully." });
         }
 
         [HttpGet("dashboard")]

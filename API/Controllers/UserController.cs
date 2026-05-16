@@ -34,5 +34,6 @@ namespace API.Controllers
             var result = await _userService.UpdateProfileAsync(dto, userId);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
+
     }
 }

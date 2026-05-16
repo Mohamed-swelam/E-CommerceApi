@@ -13,6 +13,12 @@ namespace API.Helpers
         }
         public async Task<string> SaveImageAsync(IFormFile image,string folder)
         {
+            string imageName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+
+            // 👈 تعديل أمان: لو الـ WebRootPath بـ null، استخدم مسار المشروع الحالي متبوعاً بـ wwwroot
+            string rootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            string folderPath = Path.Combine(rootPath, folder);
             string imageName =Guid.NewGuid() + Path.GetExtension(image.FileName);
 
             string webRootPath = !string.IsNullOrEmpty(_webHostEnvironment.WebRootPath)
@@ -26,6 +32,9 @@ namespace API.Helpers
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
+
+            string fullPath = Path.Combine(folderPath, imageName);
+            using (var stream = new FileStream(fullPath, FileMode.Create))
             }
 
             string fullPath =Path.Combine(folderPath,imageName);
@@ -37,9 +46,15 @@ namespace API.Helpers
 
             return imageName;
         }
-        public void DeleteImage(string imageName, string folder)
+
+        public void DeleteImage(string imagePath, string folder)
         {
-            string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, folder, imageName);
+            string cleanImageName = Path.GetFileName(imagePath);
+
+            // 👈 تعديل أمان نفس الشيء هنا في ميثود المسح
+            string rootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+            string fullPath = Path.Combine(rootPath, folder, cleanImageName);
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
         }

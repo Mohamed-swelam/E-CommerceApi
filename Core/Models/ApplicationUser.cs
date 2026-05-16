@@ -12,8 +12,10 @@ namespace Core.Models
         public string FullName { get; set; }
 
         public string? ImagePath { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
+        public string Role { get; set; } = "user";  
+        public bool IsDeleted { get; set; } = false; 
+        public bool IsBlocked { get; set; } = false;  
+        public bool IsSellerApproved { get; set; } = false; 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
