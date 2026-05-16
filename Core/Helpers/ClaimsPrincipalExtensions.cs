@@ -6,7 +6,8 @@ namespace Core.Helpers
     {
         public static string? GetUserId(this ClaimsPrincipal user)
         {
-            return user.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
+            return user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? user.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
         }
     }
 }

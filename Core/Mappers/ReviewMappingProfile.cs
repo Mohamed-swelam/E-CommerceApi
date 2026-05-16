@@ -12,7 +12,9 @@ namespace Core.Mappers
             // Review => ReviewDto
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.UserName,
-                opt => opt.MapFrom(src => src.User.UserName));
+                opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.UserFullName,
+                opt => opt.MapFrom(src => src.User.FullName));
         }
     }
 }
