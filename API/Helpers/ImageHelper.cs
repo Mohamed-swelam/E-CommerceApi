@@ -11,15 +11,9 @@ namespace API.Helpers
         {
             _webHostEnvironment = webHostEnvironment;
         }
-        public async Task<string> SaveImageAsync(IFormFile image,string folder)
+        public async Task<string> SaveImageAsync(IFormFile image, string folder)
         {
             string imageName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-
-            // 👈 تعديل أمان: لو الـ WebRootPath بـ null، استخدم مسار المشروع الحالي متبوعاً بـ wwwroot
-            string rootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-            string folderPath = Path.Combine(rootPath, folder);
-            string imageName =Guid.NewGuid() + Path.GetExtension(image.FileName);
 
             string webRootPath = !string.IsNullOrEmpty(_webHostEnvironment.WebRootPath)
                 ? _webHostEnvironment.WebRootPath
@@ -27,19 +21,16 @@ namespace API.Helpers
             Console.WriteLine($"[ImageHelper] WebRootPath = '{_webHostEnvironment.WebRootPath}'");
             Console.WriteLine($"[ImageHelper] Saving to: {webRootPath}");
 
-            string folderPath =Path.Combine(webRootPath,folder);
+            string folderPath = Path.Combine(webRootPath, folder);
 
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
-
-            string fullPath = Path.Combine(folderPath, imageName);
-            using (var stream = new FileStream(fullPath, FileMode.Create))
             }
 
-            string fullPath =Path.Combine(folderPath,imageName);
+            string fullPath = Path.Combine(folderPath, imageName);
 
-            using (var stream =new FileStream(fullPath,FileMode.Create))
+            using (var stream = new FileStream(fullPath, FileMode.Create))
             {
                 await image.CopyToAsync(stream);
             }
