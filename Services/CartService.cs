@@ -11,17 +11,13 @@ namespace Services
         private readonly ICartRepository repository;
         private readonly IProductRepository productRepository;
 
-        public CartService(
-            ICartRepository repository,
-            IProductRepository productRepository)
+        public CartService(ICartRepository repository, IProductRepository productRepository)
         {
             this.repository = repository;
             this.productRepository = productRepository;
         }
 
-        public async Task<CartResponseDto?> GetUserCartAsync(
-            string? userId,
-            string? guestId)
+        public async Task<CartResponseDto?> GetUserCartAsync(string? userId, string? guestId)
         {
             var cart = await repository.GetAsync(
                 c =>
@@ -70,10 +66,7 @@ namespace Services
             };
         }
 
-        public async Task<GeneralResponse> AddToCartAsync(
-            AddToCartDto dto,
-            string? userId,
-            string? guestId)
+        public async Task<GeneralResponse> AddToCartAsync(AddToCartDto dto, string? userId, string? guestId)
         {
             if (dto.Quantity <= 0)
             {
@@ -356,6 +349,7 @@ namespace Services
             repository.Delete(guestCart);
 
             await repository.SaveChangesAsync();
+
         }
     }
 }

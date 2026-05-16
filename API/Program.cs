@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Services;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 const string AngularCorsPolicy = "AngularClient";
@@ -133,7 +134,9 @@ builder.Services.AddControllers()
                 Errors = errors
             });
         };
-    });
+    }).AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter()));
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -177,7 +180,7 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath),
     RequestPath = ""
-}); 
+});
 
 
 app.UseHttpsRedirection();

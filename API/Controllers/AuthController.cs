@@ -34,7 +34,12 @@ namespace API.Controllers
             {
                 return Unauthorized(result);
             }
-            Response.Cookies.Delete("GuestId");
+            Response.Cookies.Delete("GuestId",
+                new CookieOptions
+                {
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
             return Ok(result);
         }
 

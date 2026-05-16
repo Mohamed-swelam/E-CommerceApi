@@ -123,23 +123,14 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpGet("{id:int}/status")]
         public async Task<IActionResult> GetOrderStatus(int id)
         {
             var userId = User.GetUserId();
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new
-                {
-                    IsSuccess = false,
-                    Data = "User is not authenticated."
-                });
-            }
+            var guestId = GuestHelper.GetGuestId(HttpContext);
 
             var result =
-                await orderService.GetOrderStatusAsync(id, userId);
+                await orderService.GetOrderStatusAsync(id, userId, guestId);
 
             if (!result.IsSuccess)
             {
