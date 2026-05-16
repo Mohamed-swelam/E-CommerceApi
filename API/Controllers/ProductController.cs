@@ -140,7 +140,7 @@ namespace API.Controllers
         // POST: api/product/{id}/image
         [HttpPost("{id:int}/image")]
         [Authorize(Roles = "Seller,Admin")]
-        public async Task<IActionResult> AddProductImage(int id,[FromForm] IFormFile image)
+        public async Task<IActionResult> AddProductImage(int id, [FromForm] ProductImageDto dto)
         {
             var userId = User.GetUserId();
 
@@ -153,7 +153,7 @@ namespace API.Controllers
                 });
             }
 
-            var response =await service.AddProductImageAsync(id,image,userId);
+            var response =await service.AddProductImageAsync(id,dto.Image,userId);
 
             if (!response.IsSuccess)
             {

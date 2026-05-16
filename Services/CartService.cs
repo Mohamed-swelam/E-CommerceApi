@@ -44,24 +44,14 @@ namespace Services
                     {
                         ProductId = i.ProductId,
 
-                        ProductName =
-                            i.Product?.Name ?? "No Name",
+                        ProductName = i.Product?.Name ?? "No Name",
 
-                        Price =
-                            i.Product?.Price ?? 0,
-
+                        Price = i.Product?.Price ?? 0,
+                        StockQuantity = i.Product?.StockQuantity ?? 0,
                         Quantity = i.Quantity,
 
-                        ImageUrl =
-                            i.Product?.ImagesNames
-                            .FirstOrDefault(img => img.IsMain)
-                            ?.ImageName
-
-                            ??
-
-                            i.Product?.ImagesNames
-                            .FirstOrDefault()
-                            ?.ImageName ?? ""
+                        ImageUrl = i.Product?.ImagesNames.FirstOrDefault(img => img.IsMain)?.ImageName
+                            ?? i.Product?.ImagesNames.FirstOrDefault()?.ImageName ?? ""
                     }).ToList()
             };
         }
@@ -210,10 +200,7 @@ namespace Services
             };
         }
 
-        public async Task<GeneralResponse> RemoveCartItemAsync(
-            int productId,
-            string? userId,
-            string? guestId)
+        public async Task<GeneralResponse> RemoveCartItemAsync(int productId, string? userId, string? guestId)
         {
             var cart = await repository.GetAsync(
                 c =>
@@ -258,9 +245,7 @@ namespace Services
             };
         }
 
-        public async Task<GeneralResponse> ClearCartAsync(
-            string? userId,
-            string? guestId)
+        public async Task<GeneralResponse> ClearCartAsync(string? userId, string? guestId)
         {
             var cart = await repository.GetAsync(
                 c =>
