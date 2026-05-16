@@ -34,7 +34,6 @@ namespace API.Controllers
             {
                 return Unauthorized(result);
             }
-            Response.Cookies.Delete("GuestId");
             return Ok(result);
         }
 

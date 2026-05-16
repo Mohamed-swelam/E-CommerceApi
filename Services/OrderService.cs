@@ -31,21 +31,23 @@ namespace Services
             this.paymentRepository = paymentRepository;
         }
 
-        public async Task<GeneralResponse> GetAllOrdersAsync(string userId)
+        public async Task<GeneralResponse> GetAllOrdersAsync(string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
             try
             {
                 var orders = await orderRepository
-                    .GetAll( o => o.UserId == userId,
+                    .GetAll(o =>
+                        !string.IsNullOrEmpty(userId)
+                        ? o.UserId == userId
+                        : o.GuestId == guestId,
                         includeProperties: "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames")
                     .OrderByDescending(o => o.OrderDate)
                     .ToListAsync();
 
                 var orderDtos = orders.Select(o =>
                 {
-
                     decimal subTotal =
                         o.OrderItems.Sum(i => i.Price * i.Quantity);
 
@@ -60,6 +62,7 @@ namespace Services
                         ShippingAddress = o.ShippingAddress,
 
                         UserId = o.UserId,
+                        GuestId = o.GuestId,
 
                         TotalItems =
                             o.OrderItems.Sum(i => i.Quantity),
@@ -110,9 +113,7 @@ namespace Services
             }
         }
 
-        public async Task<GeneralResponse> GetOrderByIdAsync(
-            int id,
-            string userId)
+        public async Task<GeneralResponse> GetOrderByIdAsync(int id, string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
@@ -120,7 +121,9 @@ namespace Services
             {
                 var order = await orderRepository.GetAsync(
                     o => o.OrderId == id &&
-                         o.UserId == userId,
+                         !string.IsNullOrEmpty(userId)
+                        ? o.UserId == userId
+                        : o.GuestId == guestId,
                     includeProperties:
                     "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames");
 
@@ -132,8 +135,7 @@ namespace Services
                     return response;
                 }
 
-                decimal subTotal =
-                    order.OrderItems.Sum(i => i.Price * i.Quantity);
+                decimal subTotal = order.OrderItems.Sum(i => i.Price * i.Quantity);
 
                 var orderDto = new OrderResponseDto
                 {
@@ -146,6 +148,7 @@ namespace Services
                     ShippingAddress = order.ShippingAddress,
 
                     UserId = order.UserId,
+                    GuestId = order.GuestId,
 
                     TotalItems =
                         order.OrderItems.Sum(i => i.Quantity),
@@ -195,7 +198,7 @@ namespace Services
             }
         }
 
-        public async Task<GeneralResponse> CreateOrderAsync(CreateOrderRequestDto dto,string? userId,string? guestId)
+        public async Task<GeneralResponse> CreateOrderAsync(CreateOrderRequestDto dto, string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
@@ -221,16 +224,27 @@ namespace Services
                     }
                 }
 
+                if (string.IsNullOrWhiteSpace(dto.ShippingAddress))
+                {
+                    response.IsSuccess = false;
 
-                var hasPendingOrder = await orderRepository.GetAsync(
-                    o =>
-                        (
-                            !string.IsNullOrEmpty(userId)
-                            ? o.UserId == userId
-                            : o.GuestEmail == dto.GuestEmail
-                        )
-                        &&
-                        o.Status == OrderStatus.Pending);
+                    response.Data =
+                        "Shipping address is required.";
+
+                    return response;
+                }
+
+                var pendingExpiration = DateTime.UtcNow.AddMinutes(-15);
+
+                var hasPendingOrder = await orderRepository.GetAsync(o =>
+                            (
+                                !string.IsNullOrEmpty(userId)
+                                ? o.UserId == userId
+                                : o.GuestEmail == dto.GuestEmail
+                            ) && o.Status == OrderStatus.Pending
+                            &&
+                            o.OrderDate > pendingExpiration
+                    );
 
                 if (hasPendingOrder != null)
                 {
@@ -242,7 +256,7 @@ namespace Services
                 }
 
                 var cart = await cartRepository.GetAsync(
-                    c=>!string.IsNullOrEmpty(userId)
+                    c => !string.IsNullOrEmpty(userId)
                         ? c.UserId == userId
                         : c.GuestId == guestId,
                     includeProperties: "Items,Items.Product");
@@ -286,8 +300,7 @@ namespace Services
                         return response;
                     }
 
-                    totalAmount +=
-                        item.Product.Price * item.Quantity;
+                    totalAmount += item.Product.Price * item.Quantity;
 
                     orderItems.Add(new OrderItem
                     {
@@ -312,13 +325,14 @@ namespace Services
                     OrderDate = DateTime.UtcNow,
                     Status = OrderStatus.Pending,
                     TotalAmount = totalAmount,
-                    OrderItems = orderItems
+                    OrderItems = orderItems,
+                    GuestId = guestId
                 };
 
                 order.Payment = new Payment
                 {
                     Amount = totalAmount,
-                    
+
                     TransactionId = paymentIntent.Id,
                     ClientSecret = paymentIntent.ClientSecret,
                     PaymentMethod = "Card",
@@ -343,15 +357,16 @@ namespace Services
             catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Data = ex.Message;
+
+                response.Data =
+                    ex.InnerException?.Message
+                    ?? ex.Message;
 
                 return response;
             }
         }
 
-        public async Task<GeneralResponse> CancelOrderAsync(
-            int id,
-            string userId)
+        public async Task<GeneralResponse> CancelOrderAsync(int id, string? userId, string? guestId)
         {
             var response = new GeneralResponse();
 
@@ -359,7 +374,11 @@ namespace Services
             {
                 var order = await orderRepository.GetAsync(
                     o => o.OrderId == id &&
-                         o.UserId == userId,
+                         (
+                             !string.IsNullOrEmpty(userId)
+                                 ? o.UserId == userId
+                                 : o.GuestId == guestId
+                         ),
                     includeProperties: "Payment");
 
                 if (order == null)
@@ -407,14 +426,18 @@ namespace Services
             }
         }
 
-        public async Task<GeneralResponse> GetOrderStatusAsync(int id, string userId)
+        public async Task<GeneralResponse> GetOrderStatusAsync(int id, string? userId, string? guestId)
         {
             var response = new GeneralResponse();
             try
             {
-                var order = await orderRepository.GetAsync(
-                    o => o.OrderId == id &&
-                         o.UserId == userId);
+                var order = await orderRepository.GetAsync(o =>
+                    o.OrderId == id &&
+                    (
+                        !string.IsNullOrEmpty(userId)
+                            ? o.UserId == userId
+                            : o.GuestId == guestId
+                    ));
                 if (order == null)
                 {
                     response.IsSuccess = false;

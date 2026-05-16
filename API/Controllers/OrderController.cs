@@ -17,23 +17,14 @@ namespace API.Controllers
             this.orderService = orderService;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
             var userId = User.GetUserId();
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new
-                {
-                    IsSuccess = false,
-                    Data = "User is not authenticated."
-                });
-            }
+            var guestId = GuestHelper.GetGuestId(HttpContext);
 
             var result =
-                await orderService.GetAllOrdersAsync(userId);
+                await orderService.GetAllOrdersAsync(userId, guestId);
 
             if (!result.IsSuccess)
             {
@@ -43,23 +34,15 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             var userId = User.GetUserId();
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new
-                {
-                    IsSuccess = false,
-                    Data = "User is not authenticated."
-                });
-            }
+            var guestId = GuestHelper.GetGuestId(HttpContext);
 
             var result =
-                await orderService.GetOrderByIdAsync(id, userId);
+                await orderService.GetOrderByIdAsync(id, userId, guestId);
+
 
             if (!result.IsSuccess)
             {
@@ -97,23 +80,15 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> CancelOrder(int id)
         {
             var userId = User.GetUserId();
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new
-                {
-                    IsSuccess = false,
-                    Data = "User is not authenticated."
-                });
-            }
+            var guestId = GuestHelper.GetGuestId(HttpContext);
 
             var result =
-                await orderService.CancelOrderAsync(id, userId);
+                await orderService.CancelOrderAsync(id, userId, guestId);
 
             if (!result.IsSuccess)
             {
@@ -123,23 +98,14 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpGet("{id:int}/status")]
         public async Task<IActionResult> GetOrderStatus(int id)
         {
             var userId = User.GetUserId();
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new
-                {
-                    IsSuccess = false,
-                    Data = "User is not authenticated."
-                });
-            }
+            var guestId = GuestHelper.GetGuestId(HttpContext);
 
             var result =
-                await orderService.GetOrderStatusAsync(id, userId);
+                await orderService.GetOrderStatusAsync(id, userId, guestId);
 
             if (!result.IsSuccess)
             {

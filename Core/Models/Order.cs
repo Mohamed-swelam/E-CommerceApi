@@ -20,9 +20,9 @@ namespace Core.Models
         [MaxLength(250)]
         public required string ShippingAddress { get; set; }
 
-        [Required]
+        
         [ForeignKey(nameof(User))]
-        public required string UserId { get; set; }
+        public string? UserId { get; set; }
 
         public ApplicationUser? User { get; set; }
 
@@ -36,6 +36,8 @@ namespace Core.Models
 
         public string? GuestName { get; set; }
 
-        public string? GuestEmail{get; set;} 
+        public string? GuestEmail{get; set;}
+
+        public string? GuestId { get; set; }
     }
 }

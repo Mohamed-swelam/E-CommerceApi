@@ -115,8 +115,11 @@ namespace Services
 
                         // Clear cart
                         var cart = await cartRepository.GetAsync(
-                            c => c.UserId == payment.Order.UserId,
-                            includeProperties: "Items");
+                        c =>
+                            !string.IsNullOrEmpty(payment.Order.UserId)
+                            ? c.UserId == payment.Order.UserId
+                            : c.GuestId == payment.Order.GuestId,
+                        includeProperties: "Items");
 
                         if (cart != null)
                         {
@@ -139,8 +142,7 @@ namespace Services
                 if (stripeEvent.Type ==
                     "payment_intent.payment_failed")
                 {
-                    var paymentIntent =
-                        stripeEvent.Data.Object as PaymentIntent;
+                    var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
 
                     if (paymentIntent == null)
                     {

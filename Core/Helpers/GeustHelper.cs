@@ -24,11 +24,8 @@ namespace Core.Helpers
                 guestId,
                 new CookieOptions
                 {
-                    Expires =
-                        DateTimeOffset.UtcNow.AddDays(30),
-
+                    Expires =DateTimeOffset.UtcNow.AddDays(30),
                     HttpOnly = true,
-
                     Secure = true,
                     SameSite = SameSiteMode.None
                 });

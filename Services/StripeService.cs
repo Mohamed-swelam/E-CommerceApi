@@ -18,14 +18,29 @@ namespace Services
 
         public async Task<PaymentIntent> CreatePaymentIntent(decimal amount)
         {
+            if (amount <= 0)
+            {
+                throw new Exception(
+                    "Invalid payment amount."
+                );
+            }
+
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(amount * 100),
+
                 Currency = "usd",
-                PaymentMethodTypes = new List<string>
-            {
-                "card"
-            }
+
+                PaymentMethodTypes =
+                new List<string>
+                {
+                    "card"
+                },
+
+                Metadata = new Dictionary<string, string>
+                {
+                    { "integration", "ecommerce-api" }
+                }
             };
 
             var service = new PaymentIntentService();
