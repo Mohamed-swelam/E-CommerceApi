@@ -30,6 +30,8 @@ namespace Core.Models
         [Column(TypeName = "decimal(18,2)")]
         [Range(0, double.MaxValue, ErrorMessage = "Earnings must be Positive")]
         public decimal TotalEarnings { get; set; } = 0;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         public ICollection<Product> Products { get; set; } = new HashSet<Product>();
 

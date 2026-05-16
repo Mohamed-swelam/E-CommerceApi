@@ -223,6 +223,87 @@ namespace API.Controllers
             return Ok(new { Success = true, Message = "Seller approved and role updated to Seller successfully." });
         }
 
+        [HttpGet("pending-sellers")]
+        public async Task<IActionResult> GetPendingSellers()
+        {
+            var pendingSellers = await _context.Sellers
+                .Include(s => s.User)
+                .Where(s => s.IsApproved == false)
+                .Select(s => new
+                {
+                    Id = s.Id,
+                    FullName = s.User.FullName,
+                    Email = s.User.Email,
+                    StoreName = s.StoreName,
+                    IsApproved = s.IsApproved
+                })
+                .ToListAsync();
+
+            return Ok(new { isSuccess = true, data = pendingSellers });
+        }
+
+        [HttpDelete("reject-seller/{sellerId}")]
+        public async Task<IActionResult> RejectSeller(int sellerId)
+        {
+            var seller = await _context.Sellers
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == sellerId);
+
+            if (seller == null)
+                return NotFound(new { Success = false, Message = "Seller not found" });
+
+            // إعادة الدور إلى Customer
+            if (seller.User != null)
+            {
+                seller.User.Role = "Customer";
+
+                var currentRoles = await _userManager.GetRolesAsync(seller.User);
+                await _userManager.RemoveFromRolesAsync(seller.User, currentRoles);
+                await _userManager.AddToRoleAsync(seller.User, "Customer");
+
+                await _userManager.UpdateAsync(seller.User);
+            }
+
+            // حذف طلب البائع
+            _context.Sellers.Remove(seller);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Success = true, Message = "Seller rejected and role reverted to Customer" });
+        }
+
+        [HttpGet("approved-sellers")]
+        public async Task<IActionResult> GetApprovedSellers()
+        {
+            try
+            {
+                var approvedSellers = await _context.Sellers
+                    .Include(s => s.User)
+                    .Where(s => s.IsApproved == true)
+                    .Select(s => new
+                    {
+                        s.Id,
+                        s.UserId,
+                        s.StoreName,
+                        s.Description,
+                        s.Logo,
+                        s.IsApproved,
+                        s.TotalEarnings,
+                        s.CreatedAt,
+                        s.UpdatedAt,
+                        FullName = s.User != null ? s.User.FullName : "Unknown",
+                        Email = s.User != null ? s.User.Email : "No Email",
+                        PhoneNumber = s.User != null ? s.User.PhoneNumber : ""
+                    })
+                    .ToListAsync();
+
+                return Ok(new { isSuccess = true, data = approvedSellers, count = approvedSellers.Count });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { isSuccess = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("dashboard")]
         public async Task<IActionResult> GetDashboardStats()
         {

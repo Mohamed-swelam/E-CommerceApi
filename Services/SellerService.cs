@@ -24,55 +24,70 @@ namespace Services
             _imageHelper = imageHelper;
         }
 
-        
+
         public async Task<GeneralResponse> RegisterSellerAsync(RegisterSellerDto dto, string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return Fail("User not found.");
-
-            var existingSeller = await _context.Sellers
-                .FirstOrDefaultAsync(s => s.UserId == userId);
-
-            if (existingSeller != null)
-                return Fail("You are already registered as a seller.");
-
-            var storeExists = await _context.Sellers
-                .AnyAsync(s => s.StoreName == dto.StoreName);
-
-            if (storeExists)
-                return Fail("Store name already taken. Please choose another.");
-
-            string? logoPath = null;
-            if (dto.Logo != null)
+            try
             {
-                var imageName = await _imageHelper.SaveImageAsync(dto.Logo, "images/sellers");
-                logoPath = $"images/sellers/{imageName}";
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return Fail("User not found.");
+
+                var isActiveSeller = await _userManager.IsInRoleAsync(user, "Seller");
+                if (isActiveSeller)
+                    return Fail("You are currently an active seller.");
+
+                var existingSeller = await _context.Sellers
+                    .FirstOrDefaultAsync(s => s.UserId == userId);
+
+                if (existingSeller != null)
+                {
+                    if (!string.IsNullOrEmpty(existingSeller.Logo))
+                        _imageHelper.DeleteImage(existingSeller.Logo, "images/sellers");
+
+                    _context.Sellers.Remove(existingSeller);
+                    await _context.SaveChangesAsync();
+                }
+
+                var storeExists = await _context.Sellers
+                    .AnyAsync(s => s.StoreName == dto.StoreName);
+
+                if (storeExists)
+                    return Fail("Store name already taken.");
+
+                string? logoPath = null;
+                if (dto.Logo != null)
+                {
+                    var imageName = await _imageHelper.SaveImageAsync(dto.Logo, "images/sellers");
+                    logoPath = $"images/sellers/{imageName}";
+                }
+
+                var seller = new Sellerprofile
+                {
+                    UserId = userId,
+                    StoreName = dto.StoreName,
+                    Description = dto.Description,
+                    Logo = logoPath,
+                    IsApproved = false,
+                    TotalEarnings = 0,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _context.Sellers.AddAsync(seller);
+                await _context.SaveChangesAsync();
+
+                return Ok("Seller registration submitted successfully.");
             }
-
-            var seller = new Sellerprofile
+            catch (Exception ex)
             {
-                UserId = userId,
-                StoreName = dto.StoreName,
-                Description = dto.Description,
-                Logo = logoPath,
-                IsApproved = false,
-                TotalEarnings = 0
-            };
+                Console.WriteLine($"ERROR: {ex.Message}");
+                Console.WriteLine($"STACK: {ex.StackTrace}");
 
-            await _context.Sellers.AddAsync(seller);
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            await _userManager.AddToRoleAsync(user, "Seller");
-
-            user.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok("Seller registered successfully. Waiting for admin approval.");
+                return Fail($"Server error: {ex.Message}");
+            }
         }
 
-        
         public async Task<GeneralResponse> GetSellerProfileAsync(string userId)
         {
             var seller = await _context.Sellers
