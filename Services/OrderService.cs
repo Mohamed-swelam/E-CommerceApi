@@ -31,6 +31,85 @@ namespace Services
             this.paymentRepository = paymentRepository;
         }
 
+
+
+        public async Task<GeneralResponse> GetAllOrdersForAdminAsync()
+        {
+            var response = new GeneralResponse();
+
+            try
+            {
+                var orders = await orderRepository
+                    .GetAll(
+                        includeProperties:
+                        "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames"
+                    )
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                var orderDtos = orders.Select(o =>
+                {
+                    decimal subTotal =
+                        o.OrderItems.Sum(i => i.Price * i.Quantity);
+
+                    return new OrderResponseDto
+                    {
+                        OrderId = o.OrderId,
+                        OrderDate = o.OrderDate,
+                        Status = o.Status,
+                        ShippingAddress = o.ShippingAddress,
+                        UserId = o.UserId,
+                        GuestId = o.GuestId,
+
+                        TotalItems =
+                            o.OrderItems.Sum(i => i.Quantity),
+
+                        SubTotal = subTotal,
+
+                        ShippingFees = ShippingFees,
+
+                        TotalAmount = subTotal + ShippingFees,
+
+                        OrderItems = o.OrderItems.Select(oi =>
+                            new OrderItemResponseDto
+                            {
+                                ProductId = oi.ProductId,
+
+                                ProductName =
+                                    oi.Product?.Name ?? "No Name",
+
+                                Quantity = oi.Quantity,
+
+                                Price = oi.Price,
+
+                                ImageUrl =
+                                    oi.Product?.ImagesNames
+                                    .FirstOrDefault(img => img.IsMain)
+                                    ?.ImageName
+
+                                    ??
+
+                                    oi.Product?.ImagesNames
+                                    .FirstOrDefault()
+                                    ?.ImageName
+                            }).ToList()
+                    };
+                }).ToList();
+
+                response.IsSuccess = true;
+                response.Data = orderDtos;
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Data = ex.Message;
+
+                return response;
+            }
+        }
+
         public async Task<GeneralResponse> GetAllOrdersAsync(string? userId, string? guestId)
         {
             var response = new GeneralResponse();
