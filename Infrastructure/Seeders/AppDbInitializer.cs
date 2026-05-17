@@ -29,6 +29,8 @@ namespace Infrastructure.Seeders
             {
                 var usersPath = Path.Combine(
     Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
     "Seeders",
     "Dummy",
     "Users.json");
@@ -70,6 +72,8 @@ namespace Infrastructure.Seeders
             {
                 var categoriesPath = Path.Combine(
     Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
     "Seeders",
     "Dummy",
     "Categories.json");
@@ -87,6 +91,8 @@ namespace Infrastructure.Seeders
             {
                 var sellerProfilesPath = Path.Combine(
     Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
     "Seeders",
     "Dummy",
     "SellerProfiles.json");
@@ -124,6 +130,8 @@ namespace Infrastructure.Seeders
             {
                 var productsPath = Path.Combine(
     Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
     "Seeders",
     "Dummy",
     "Products.json");
@@ -157,7 +165,7 @@ namespace Infrastructure.Seeders
                             {
                                 ImageName = i.ImageName,
                                 IsMain = i.IsMain
-                           })
+                            })
                         .ToList()
                     };
 
