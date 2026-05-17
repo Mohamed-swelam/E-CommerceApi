@@ -68,21 +68,38 @@ namespace Infrastructure.Seeders
                 }
             }
 
-            if (!context.Categories.Any())
+            // Always sync categories from JSON (so icon changes are picked up)
+            var categoriesPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "..",
+                "Infrastructure",
+                "Seeders",
+                "Dummy",
+                "Categories.json");
+
+            var jsonCategories =
+                await ReadJsonAsync<List<Category>>(
+                    categoriesPath);
+
+            if (jsonCategories != null)
             {
-                var categoriesPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-                    "..",
-                    "Infrastructure",
-    "Seeders",
-    "Dummy",
-    "Categories.json");
+                foreach (var jsonCategory in jsonCategories)
+                {
+                    var existing = await context.Categories
+                        .FirstOrDefaultAsync(c => c.Name == jsonCategory.Name);
 
-                var categories =
-                    await ReadJsonAsync<List<Category>>(
-                        categoriesPath);
-
-                context.Categories.AddRange(categories);
+                    if (existing != null)
+                    {
+                        // Update existing category (especially icon)
+                        existing.Icon = jsonCategory.Icon;
+                        context.Categories.Update(existing);
+                    }
+                    else
+                    {
+                        // Add new category if it doesn't exist
+                        context.Categories.Add(jsonCategory);
+                    }
+                }
 
                 await context.SaveChangesAsync();
             }
