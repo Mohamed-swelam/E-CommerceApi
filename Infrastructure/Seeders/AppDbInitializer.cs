@@ -1,4 +1,4 @@
-﻿using Core.Models;
+using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Seeders.SeedingHelpers;
 using Microsoft.AspNetCore.Identity;
@@ -173,6 +173,24 @@ namespace Infrastructure.Seeders
                 }
 
                 await context.SaveChangesAsync();
+            }
+
+            if (!context.Banners.Any())
+            {
+                var bannersPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "..",
+                    "Infrastructure",
+                    "Seeders",
+                    "Dummy",
+                    "Banners.json");
+
+                var banners = await ReadJsonAsync<List<Banner>>(bannersPath);
+                if (banners != null)
+                {
+                    context.Banners.AddRange(banners);
+                    await context.SaveChangesAsync();
+                }
             }
 
 
