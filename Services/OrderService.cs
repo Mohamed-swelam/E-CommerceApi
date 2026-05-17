@@ -42,7 +42,7 @@ namespace Services
                 var orders = await orderRepository
                     .GetAll(
                         includeProperties:
-                        "OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames"
+                        "User,OrderItems,OrderItems.Product,OrderItems.Product.ImagesNames,OrderItems.Product.SellerProfile"
                     )
                     .OrderByDescending(o => o.OrderDate)
                     .ToListAsync();
@@ -69,6 +69,12 @@ namespace Services
                         ShippingFees = ShippingFees,
 
                         TotalAmount = subTotal + ShippingFees,
+
+                        CustomerName = o.User != null
+                                ? o.User.FullName
+                                : o.GuestName,
+
+                        SellerName = o.OrderItems.FirstOrDefault()?.Product?.SellerProfile?.StoreName,
 
                         OrderItems = o.OrderItems.Select(oi =>
                             new OrderItemResponseDto
