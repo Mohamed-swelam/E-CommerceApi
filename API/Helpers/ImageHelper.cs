@@ -42,7 +42,6 @@ namespace API.Helpers
         {
             string cleanImageName = Path.GetFileName(imagePath);
 
-            // 👈 تعديل أمان نفس الشيء هنا في ميثود المسح
             string rootPath = _webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
             string fullPath = Path.Combine(rootPath, folder, cleanImageName);
