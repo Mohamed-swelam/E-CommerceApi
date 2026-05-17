@@ -33,6 +33,28 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Seller")]
+        [HttpGet("seller/orders")]
+        public async Task<IActionResult> GetSellerOrders()
+        {
+            var userId = User.GetUserId();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result =
+                await orderService.GetSellerOrdersAsync(userId);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {
