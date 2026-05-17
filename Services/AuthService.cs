@@ -120,7 +120,10 @@ namespace Services
                 Expiration = DateTime.UtcNow.AddMinutes(30),
                 FullName = user.FullName,
                 Email = user.Email,
-                Role = roles.FirstOrDefault()
+                Role = roles.FirstOrDefault(),
+                IsBlocked = user.IsBlocked,      
+                IsDeleted = user.IsDeleted
+
             });
         }
 
