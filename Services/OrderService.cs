@@ -455,5 +455,41 @@ namespace Services
                 return response;
             }
         }
+
+        public async Task<GeneralResponse> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto)
+        {
+            var response = new GeneralResponse();
+
+            try
+            {
+                var order = await orderRepository.GetAsync(o => o.OrderId == orderId, includeProperties: "OrderItems");
+
+                if (order == null)
+                {
+                    response.IsSuccess = false;
+                    response.Data = "Order not found.";
+
+                    return response;
+                }
+
+                order.Status = dto.Status;
+
+                orderRepository.Update(order);
+
+                await orderRepository.SaveChangesAsync();
+
+                response.IsSuccess = true;
+                response.Data = "Order status updated successfully.";
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Data = ex.Message;
+
+                return response;
+            }
+        }
     }
 }
