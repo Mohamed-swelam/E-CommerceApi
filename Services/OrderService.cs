@@ -326,7 +326,7 @@ namespace Services
                     Status = OrderStatus.Pending,
                     TotalAmount = totalAmount,
                     OrderItems = orderItems,
-                    GuestId = guestId
+                    GuestId = string.IsNullOrEmpty(userId) ? guestId : null
                 };
 
                 order.Payment = new Payment
