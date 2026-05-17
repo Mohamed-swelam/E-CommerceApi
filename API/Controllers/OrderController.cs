@@ -115,5 +115,28 @@ namespace API.Controllers
             return Ok(result);
 
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id:int}/status")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    IsSuccess = false,
+                    Data = ModelState
+                });
+            }
+
+            var result = await orderService.UpdateOrderStatusAsync(id, dto);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
     }
 }

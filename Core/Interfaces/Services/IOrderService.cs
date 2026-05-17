@@ -13,5 +13,6 @@ namespace Core.Interfaces.Services
 
         Task<GeneralResponse> CancelOrderAsync(int id, string? userId, string? guestId);
         Task<GeneralResponse> GetOrderStatusAsync(int id, string? userId, string? guestId);
+        Task<GeneralResponse> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusDto dto);
     }
 }
