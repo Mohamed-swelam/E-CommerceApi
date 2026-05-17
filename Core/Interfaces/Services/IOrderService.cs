@@ -5,6 +5,7 @@ namespace Core.Interfaces.Services
 {
     public interface IOrderService
     {
+        Task<GeneralResponse> GetAllOrdersForAdminAsync();
         Task<GeneralResponse> GetAllOrdersAsync(string? userId, string? guestId);
 
         Task<GeneralResponse> GetOrderByIdAsync(int id, string? userId, string? guestId);

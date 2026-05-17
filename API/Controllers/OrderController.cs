@@ -17,6 +17,22 @@ namespace API.Controllers
             this.orderService = orderService;
         }
 
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin/all")]
+        public async Task<IActionResult> GetAllOrdersForAdmin()
+        {
+            var result =
+                await orderService.GetAllOrdersForAdminAsync();
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllOrders()
         {

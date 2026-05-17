@@ -14,6 +14,9 @@ namespace Core.DTOs.Order
         public int TotalItems { get; set; }
         public decimal SubTotal { get; set; }
         public decimal ShippingFees { get; set; }
+        public string? CustomerName { get; set; }
+
+        public string? SellerName { get; set; }
         public List<OrderItemResponseDto> OrderItems { get; set; } = new List<OrderItemResponseDto>();
     }
 }
