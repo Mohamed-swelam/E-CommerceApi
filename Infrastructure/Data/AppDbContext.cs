@@ -1,4 +1,4 @@
-﻿using Core.Models;
+using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -213,5 +213,6 @@ namespace Infrastructure.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Shipping> Shippings { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<Banner> Banners { get; set; }
     }
 }
