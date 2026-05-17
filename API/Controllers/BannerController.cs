@@ -10,63 +10,84 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class BannerController : ControllerBase
     {
-        private readonly IBannerService _bannerService;
+        private readonly IBannerService _service;
 
-        public BannerController(IBannerService bannerService)
+        public BannerController(IBannerService service)
         {
-            _bannerService = bannerService;
+            _service = service;
         }
 
+        // GET: api/Banner
         [HttpGet]
         public async Task<IActionResult> GetActiveBanners()
         {
-            var response = await _bannerService.GetActiveBannersAsync();
-            if (!response.IsSuccess) return BadRequest(response);
+            var response = await _service.GetActiveBannersAsync();
+            if (!response.IsSuccess)
+                return BadRequest(response);
             return Ok(response);
         }
 
+        // GET: api/Banner/all
         [HttpGet("all")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllBanners()
         {
-            var response = await _bannerService.GetAllBannersAsync();
-            if (!response.IsSuccess) return BadRequest(response);
+            var response = await _service.GetAllBannersAsync();
+            if (!response.IsSuccess)
+                return BadRequest(response);
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetBannerById(int id)
+        // GET: api/Banner/{id}
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetBanner(int id)
         {
-            var response = await _bannerService.GetBannerByIdAsync(id);
-            if (!response.IsSuccess) return NotFound(response);
+            var response = await _service.GetBannerByIdAsync(id);
+            if (!response.IsSuccess)
+                return NotFound(response);
             return Ok(response);
         }
 
+        // POST: api/Banner
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddBanner([FromForm] AddBannerDto addBannerDto)
+        public async Task<IActionResult> AddBanner([FromForm] AddBannerDto dto)
         {
-            var response = await _bannerService.AddBannerAsync(addBannerDto);
-            if (!response.IsSuccess) return BadRequest(response);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { IsSuccess = false, Data = ModelState });
+            }
+
+            var response = await _service.AddBannerAsync(dto);
+            if (!response.IsSuccess)
+                return BadRequest(response);
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
+        // PUT: api/Banner/{id}
+        [HttpPut("{id:int}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateBanner(int id, [FromForm] UpdateBannerDto updateBannerDto)
+        public async Task<IActionResult> UpdateBanner(int id, [FromForm] UpdateBannerDto dto)
         {
-            var response = await _bannerService.UpdateBannerAsync(id, updateBannerDto);
-            if (!response.IsSuccess) return BadRequest(response);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { IsSuccess = false, Data = ModelState });
+            }
+
+            var response = await _service.UpdateBannerAsync(id, dto);
+            if (!response.IsSuccess)
+                return BadRequest(response);
             return Ok(response);
         }
 
-        [HttpDelete("{id}")]
+        // DELETE: api/Banner/{id}
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBanner(int id)
         {
-            var response = await _bannerService.DeleteBannerAsync(id);
-            if (!response.IsSuccess) return BadRequest(response);
+            var response = await _service.DeleteBannerAsync(id);
+            if (!response.IsSuccess)
+                return BadRequest(response);
             return Ok(response);
         }
     }
