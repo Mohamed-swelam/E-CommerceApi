@@ -365,20 +365,19 @@ namespace Services
 
             try
             {
-
                 if (string.IsNullOrEmpty(userId))
                 {
                     if (string.IsNullOrWhiteSpace(dto.GuestName))
                     {
                         response.IsSuccess = false;
                         response.Data = "Guest name is required.";
-
                         return response;
                     }
 
                     if (string.IsNullOrWhiteSpace(dto.GuestEmail))
                     {
                         response.IsSuccess = false;
+
                         response.Data = "Guest email is required.";
 
                         return response;
@@ -389,42 +388,18 @@ namespace Services
                 {
                     response.IsSuccess = false;
 
-                    response.Data =
-                        "Shipping address is required.";
+                    response.Data = "Shipping address is required.";
 
                     return response;
                 }
 
-                var pendingExpiration = DateTime.UtcNow.AddMinutes(-15);
-
-                var hasPendingOrder = await orderRepository.GetAsync(o =>
-                            (
-                                !string.IsNullOrEmpty(userId)
-                                ? o.UserId == userId
-                                : o.GuestEmail == dto.GuestEmail
-                            ) && o.Status == OrderStatus.Pending
-                            &&
-                            o.OrderDate > pendingExpiration
-                    );
-
-                if (hasPendingOrder != null)
-                {
-                    response.IsSuccess = false;
-                    response.Data =
-                        "You already have a pending order.";
-
-                    return response;
-                }
-
-                var cart = await cartRepository.GetAsync(
-                    c => !string.IsNullOrEmpty(userId)
-                        ? c.UserId == userId
-                        : c.GuestId == guestId,
+                var cart = await cartRepository.GetAsync(c => !string.IsNullOrEmpty(userId) ? c.UserId == userId : c.GuestId == guestId,
                     includeProperties: "Items,Items.Product");
 
                 if (cart == null || !cart.Items.Any())
                 {
                     response.IsSuccess = false;
+
                     response.Data = "Cart is empty.";
 
                     return response;
@@ -436,9 +411,11 @@ namespace Services
 
                 foreach (var item in cart.Items)
                 {
+
                     if (item.Product == null)
                     {
                         response.IsSuccess = false;
+
                         response.Data = "Invalid product.";
 
                         return response;
@@ -447,6 +424,7 @@ namespace Services
                     if (item.Quantity <= 0)
                     {
                         response.IsSuccess = false;
+
                         response.Data = "Invalid quantity.";
 
                         return response;
@@ -455,8 +433,8 @@ namespace Services
                     if (item.Quantity > item.Product.StockQuantity)
                     {
                         response.IsSuccess = false;
-                        response.Data =
-                            $"{item.Product.Name} out of stock.";
+
+                        response.Data = $"{item.Product.Name} out of stock.";
 
                         return response;
                     }
@@ -469,24 +447,31 @@ namespace Services
                         Quantity = item.Quantity,
                         Price = item.Product.Price
                     });
+
                 }
 
                 totalAmount += ShippingFees;
 
-                var paymentIntent =
-                    await stripeService
-                    .CreatePaymentIntent(totalAmount);
+                var paymentIntent = await stripeService.CreatePaymentIntent(totalAmount);
 
                 var order = new Order
                 {
                     UserId = userId,
+
                     ShippingAddress = dto.ShippingAddress,
+
                     GuestEmail = dto.GuestEmail,
+
                     GuestName = dto.GuestName,
+
                     OrderDate = DateTime.UtcNow,
+
                     Status = OrderStatus.Pending,
+
                     TotalAmount = totalAmount,
+
                     OrderItems = orderItems,
+
                     GuestId = string.IsNullOrEmpty(userId) ? guestId : null
                 };
 
@@ -495,8 +480,11 @@ namespace Services
                     Amount = totalAmount,
 
                     TransactionId = paymentIntent.Id,
+
                     ClientSecret = paymentIntent.ClientSecret,
+
                     PaymentMethod = "Card",
+
                     Status = PaymentStatus.Pending
                 };
 
@@ -509,7 +497,9 @@ namespace Services
                 response.Data = new
                 {
                     OrderId = order.OrderId,
+
                     ClientSecret = paymentIntent.ClientSecret,
+
                     TotalAmount = order.TotalAmount
                 };
 
@@ -519,9 +509,7 @@ namespace Services
             {
                 response.IsSuccess = false;
 
-                response.Data =
-                    ex.InnerException?.Message
-                    ?? ex.Message;
+                response.Data = ex.InnerException?.Message ?? ex.Message;
 
                 return response;
             }
